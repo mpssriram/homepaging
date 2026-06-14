@@ -10,7 +10,6 @@ import {
 import { CockpitHero } from "../components/cinematic-hero/CockpitHero";
 import { Magnet } from "../components/ui/Magnet";
 import { ShinyText } from "../components/ui/ShinyText";
-import { useMobileViewport } from "../hooks/useMobileViewport";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { homePrograms, homeSpecs, waysIn, workPreview } from "./homeData";
 
@@ -338,14 +337,14 @@ function JoinSection() {
 }
 
 export function HomePage() {
-  const isMobileViewport = useMobileViewport();
-
   return (
     <div className="site-page site-page--home cinematic-page">
       <main className="cinematic-page__content">
         <CockpitHero />
-        {/* The R3F drone scene is desktop-only; mobile keeps a single light hero. */}
-        {!isMobileViewport && <DeferredHomeDroneHero />}
+        {/* The R3F drone scene renders on every viewport; mobile adds a gyro
+            tilt (see HomeDroneHero). It stays lazy + IntersectionObserver-gated,
+            so off-screen it costs nothing. */}
+        <DeferredHomeDroneHero />
         <AboutSection />
         <ProgramsSection />
         <WorkPreview />
