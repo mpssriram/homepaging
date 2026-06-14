@@ -21,6 +21,13 @@ import { HeroOverlay } from "./HeroOverlay";
 const MOBILE_SEQUENCE_START_FRAME = 160;
 const MOBILE_SEQUENCE_END_FRAME = 200;
 
+// Mobile uses art-directed cover instead of letterboxed "contain": the wide
+// 16:9 frame fills the portrait stage, cropping the outer struts while the
+// centered avenue/horizon/dashboard survive. focalX centered keeps the scene
+// symmetrical; tune zoom (1.05-1.20) to push into the city and focalY (~0.42)
+// to favor the horizon. Desktop keeps a plain centered cover (no override).
+const MOBILE_FRAMING = { focalX: 0.5, focalY: 0.5, zoom: 1.0 };
+
 export function CockpitHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
@@ -104,7 +111,8 @@ export function CockpitHero() {
           frameCount={COCKPIT_FRAME_COUNT}
           getNearestLoadedFrame={getNearestLoadedFrame}
           maxDevicePixelRatio={isMobileViewport ? 1 : 1.5}
-          fitMode={isMobileViewport ? "contain" : "cover"}
+          fitMode="cover"
+          framing={isMobileViewport ? MOBILE_FRAMING : undefined}
         />
         <motion.div
           className="canvas-loader"
