@@ -12,32 +12,32 @@ import { DevLoader } from "../ui/DevLoader";
 import {
   clamp,
   COCKPIT_FRAME_COUNT,
+  COCKPIT_MOBILE_FRAME_COUNT,
   getCockpitFrameSrc,
   getCockpitMobileFrameSrc,
 } from "../../lib/cinematicSequence";
 import { CockpitCanvasSequence } from "./CockpitCanvasSequence";
 import { HeroOverlay } from "./HeroOverlay";
 
-const MOBILE_SEQUENCE_START_FRAME = 160;
-const MOBILE_SEQUENCE_END_FRAME = 200;
-
-// Mobile uses art-directed cover instead of letterboxed "contain": the wide
-// 16:9 frame fills the portrait stage, cropping the outer struts while the
-// centered avenue/horizon/dashboard survive. focalX centered keeps the scene
-// symmetrical; tune zoom (1.05-1.20) to push into the city and focalY (~0.42)
-// to favor the horizon. Desktop keeps a plain centered cover (no override).
-const MOBILE_FRAMING = { focalX: 0.5, focalY: 0.5, zoom: 1.0 };
+// The cockpit swaps to the dedicated mobile sequence below 768px (per the
+// responsive brief). The navbar keeps its own default breakpoint.
+const COCKPIT_MOBILE_BREAKPOINT = 768;
+// A representative mid-sequence frame for the reduced-motion still.
+const MOBILE_STATIC_FRAME = 60;
 
 export function CockpitHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
-  const isMobileViewport = useMobileViewport();
+  const isMobileViewport = useMobileViewport(COCKPIT_MOBILE_BREAKPOINT);
   const shouldUseStaticFallback = reducedMotion;
-  const sequenceStartFrame = isMobileViewport ? MOBILE_SEQUENCE_START_FRAME : 1;
-  const sequenceEndFrame = isMobileViewport
-    ? MOBILE_SEQUENCE_END_FRAME
+  // Mobile and desktop are independent sequences with their own frame counts;
+  // both play full-length, mapped across the same scroll progress.
+  const frameCount = isMobileViewport
+    ? COCKPIT_MOBILE_FRAME_COUNT
     : COCKPIT_FRAME_COUNT;
-  const frameStep = isMobileViewport ? 6 : 2;
+  const sequenceStartFrame = 1;
+  const sequenceEndFrame = frameCount;
+  const frameStep = 2;
   const getFrameSrc = isMobileViewport
     ? getCockpitMobileFrameSrc
     : getCockpitFrameSrc;
@@ -56,7 +56,7 @@ export function CockpitHero() {
     [0, 1, 1],
   );
   const { isInitialFrameReady, getNearestLoadedFrame } = useImagePreloader({
-    frameCount: COCKPIT_FRAME_COUNT,
+    frameCount,
     getFrameSrc,
     enabled: !shouldUseStaticFallback,
     batchSize: isMobileViewport ? 2 : 4,
@@ -95,7 +95,7 @@ export function CockpitHero() {
         {/* prefers-reduced-motion: one representative frame, no scrub, on every
             viewport. The lightweight mobile asset is plenty for a still image. */}
         <img
-          src={getCockpitMobileFrameSrc(MOBILE_SEQUENCE_START_FRAME)}
+          src={getCockpitMobileFrameSrc(MOBILE_STATIC_FRAME)}
           alt="Futuristic cockpit overlooking a cyber city"
         />
         <HeroOverlay acquireOpacity={1} hideScrollCue minimal={isMobileViewport} />
@@ -108,11 +108,10 @@ export function CockpitHero() {
       <motion.div className="sticky-viewport">
         <CockpitCanvasSequence
           frameIndexRef={frameIndexRef}
-          frameCount={COCKPIT_FRAME_COUNT}
+          frameCount={frameCount}
           getNearestLoadedFrame={getNearestLoadedFrame}
           maxDevicePixelRatio={isMobileViewport ? 1 : 1.5}
-          fitMode="cover"
-          framing={isMobileViewport ? MOBILE_FRAMING : undefined}
+          fitMode={isMobileViewport ? "contain" : "cover"}
         />
         <motion.div
           className="canvas-loader"

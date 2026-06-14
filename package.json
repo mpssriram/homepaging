@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run frames:mobile && tsc -b && vite build",
     "prepare:cockpit": "node scripts/prepare-cockpit-sequence.mjs",
-    "frames:mobile": "node scripts/generate-mobile-frames.mjs",
+    "frames:mobile": "node scripts/prepare-mobile-frames.mjs",
     "typecheck": "tsc -b --pretty false",
     "preview": "vite preview"
   },

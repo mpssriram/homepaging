@@ -1,22 +1,20 @@
-// Downscales the original finalphotos JPGs into a lightweight mobile WebP set.
-// This is a pure resize of existing images (no headless rendering pipeline).
+// Prepares the mobile cockpit sequence served at /cockpit-mobile.
 //
-// Output names match the desktop sequence exactly (frame_0001.webp ...), so the
-// loader's index math is identical and only the directory + resolution differ.
+// Source frames live in for_mobile_version/ (ezgif-frame-001.jpg ...), exported
+// from the mobile video at AUTOx480 (16:9 -> ~853x480). They are copied and
+// renamed to the canonical frame_NNNN.jpg scheme so the loader's index math is
+// uniform with the desktop set. Dimensions are preserved (no resize/stretch).
 //
-//   npm run frames:mobile           # skips frames that already exist
+//   npm run frames:mobile             # skips frames that already exist
 //   npm run frames:mobile -- --force  # regenerates everything
 
-import { mkdir, readdir, stat } from "node:fs/promises";
+import { copyFile, mkdir, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import sharp from "sharp";
 
 const rootDir = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
-const SRC = path.join(rootDir, "finalphotos");
-const OUT = path.join(rootDir, "public", "cockpit-sequence-mobile");
-const MAX_EDGE = 720;
-const QUALITY = 75;
+const SRC = path.join(rootDir, "for_mobile_version");
+const OUT = path.join(rootDir, "public", "cockpit-mobile");
 
 const force = process.argv.includes("--force");
 
@@ -50,7 +48,7 @@ async function main() {
 
   // 1-based index matches the desktop pipeline (first sorted frame -> 0001).
   for (let index = 0; index < sourceFiles.length; index += 1) {
-    const outName = `frame_${String(index + 1).padStart(4, "0")}.webp`;
+    const outName = `frame_${String(index + 1).padStart(4, "0")}.jpg`;
     const outPath = path.join(OUT, outName);
 
     if (!force && (await exists(outPath))) {
@@ -58,15 +56,7 @@ async function main() {
       continue;
     }
 
-    await sharp(path.join(SRC, sourceFiles[index]))
-      .resize({
-        width: MAX_EDGE,
-        height: MAX_EDGE,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .webp({ quality: QUALITY })
-      .toFile(outPath);
+    await copyFile(path.join(SRC, sourceFiles[index]), outPath);
     written += 1;
   }
 
@@ -74,7 +64,7 @@ async function main() {
     `Mobile frames: ${written} written, ${skipped} skipped -> ${path.relative(
       rootDir,
       OUT,
-    )} (${MAX_EDGE}px, q${QUALITY}).`,
+    )} (${sourceFiles.length} frames).`,
   );
 }
 
