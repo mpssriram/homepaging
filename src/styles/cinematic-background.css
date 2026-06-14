@@ -1,0 +1,371 @@
+.site-page {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+  color: #f6fbff;
+  background: transparent;
+  --panel-bg: rgba(5, 12, 20, 0.78);
+  --panel-bg-strong: rgba(7, 17, 27, 0.9);
+  --panel-border: rgba(139, 234, 255, 0.18);
+  --panel-border-hover: rgba(139, 234, 255, 0.38);
+  --panel-highlight: rgba(224, 242, 254, 0.09);
+  --panel-shadow: 0 1.25rem 3rem rgba(2, 6, 23, 0.34);
+  --panel-glow: rgba(34, 211, 238, 0.12);
+  --danger-glow: rgba(255, 59, 107, 0.14);
+  --zone-pool: rgba(78, 197, 255, 0.05);
+  --zone-line: rgba(139, 234, 255, 0.14);
+  --pool-size: 36rem;
+}
+
+.site-page--home {
+  background: transparent;
+}
+
+.cinematic-page {
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+.cinematic-page__content {
+  position: relative;
+  z-index: 10;
+}
+
+.site-page--community {
+  --panel-glow: rgba(119, 231, 255, 0.13);
+  --zone-pool: rgba(78, 200, 230, 0.055);
+  --zone-line: rgba(119, 231, 255, 0.16);
+}
+
+.site-page--team {
+  --panel-bg: rgba(5, 13, 22, 0.82);
+  --panel-bg-strong: rgba(6, 15, 25, 0.92);
+  --panel-border: rgba(119, 231, 255, 0.18);
+  --panel-border-hover: rgba(139, 234, 255, 0.4);
+  --panel-glow: rgba(34, 211, 238, 0.13);
+  --danger-glow: rgba(255, 59, 107, 0.12);
+  --zone-pool: rgba(226, 62, 72, 0.05);
+  --zone-line: rgba(255, 59, 107, 0.16);
+}
+
+.site-page--projects {
+  --panel-border: rgba(119, 231, 255, 0.2);
+  --zone-pool: rgba(236, 72, 153, 0.05);
+  --zone-line: rgba(236, 72, 153, 0.15);
+}
+
+.site-page--events {
+  --zone-pool: rgba(124, 108, 255, 0.055);
+  --zone-line: rgba(124, 108, 255, 0.16);
+}
+
+.site-page :is(section[id], .content-section) {
+  scroll-margin-top: 7rem;
+}
+
+.site-page .content-section {
+  padding-top: clamp(4.8rem, 7vw, 7rem);
+  padding-bottom: clamp(4.8rem, 7vw, 7rem);
+}
+
+.site-page :is(h1, h2, h3) {
+  overflow: visible;
+  text-wrap: balance;
+}
+
+.site-page h2 {
+  padding-bottom: 0.08em;
+}
+
+.site-page :is(p, li) {
+  color: rgba(226, 243, 250, 0.78);
+}
+
+.site-page :is(.eyebrow, [class*="tracking-[0.18em]"], [class*="tracking-[0.16em]"]) {
+  color: #8beaff;
+}
+
+.glass-panel,
+.cinematic-card,
+.dashboard-card,
+.mission-card,
+.site-page :is(
+  .card-base,
+  .page-command-band__item,
+  .team-member-card,
+  .team-member-carousel__frame,
+  .dev-3d-card,
+  .glow-card > div,
+  .glow-card > a,
+  .content-section > div[class*="border"],
+  article[class*="border"]
+) {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--panel-border) !important;
+  background:
+    linear-gradient(180deg, var(--panel-highlight), transparent 38%),
+    radial-gradient(circle at 18% 0%, var(--panel-glow), transparent 24rem),
+    linear-gradient(145deg, var(--panel-bg), var(--panel-bg-strong)) !important;
+  box-shadow:
+    var(--panel-shadow),
+    inset 0 0 0 1px rgba(224, 242, 254, 0.045) !important;
+  backdrop-filter: blur(16px);
+}
+
+.glass-panel::before,
+.cinematic-card::before,
+.dashboard-card::before,
+.mission-card::before,
+.site-page :is(
+  .card-base,
+  .page-command-band__item,
+  .team-member-card,
+  .team-member-carousel__frame,
+  .dev-3d-card,
+  .glow-card > div,
+  .glow-card > a,
+  article[class*="border"]
+)::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(90deg, transparent, rgba(139, 234, 255, 0.1), transparent),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 1px, 100% 3.5rem;
+  opacity: 0.52;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 76%);
+}
+
+.glass-panel:hover,
+.cinematic-card:hover,
+.dashboard-card:hover,
+.mission-card:hover,
+.site-page :is(
+  .card-base,
+  .page-command-band__item,
+  .team-member-card,
+  .team-member-carousel__frame,
+  .dev-3d-card,
+  .glow-card > div,
+  .glow-card > a,
+  article[class*="border"]
+):hover,
+.site-page :is(.card-base, .team-member-card, .dev-3d-card):focus-within {
+  border-color: var(--panel-border-hover) !important;
+  box-shadow:
+    0 1.6rem 3.4rem rgba(2, 6, 23, 0.42),
+    0 0 2rem var(--panel-glow),
+    inset 0 0 0 1px rgba(224, 242, 254, 0.07) !important;
+}
+
+.site-page :is(a, button) {
+  text-underline-offset: 0.2em;
+}
+
+.site-page :is(a, button):focus-visible {
+  outline: 2px solid rgba(139, 234, 255, 0.86);
+  outline-offset: 0.22rem;
+}
+
+.site-page :is(.primary-link, [class*="border-[rgba(34,211,238"], [class*="border-[rgba(255,59,107"], [class*="border-[rgba(205,28,24"]) {
+  box-shadow:
+    inset 0 0 1.4rem rgba(34, 211, 238, 0.12),
+    0 0 1.2rem rgba(34, 211, 238, 0.08);
+}
+
+/* ── Zoned section treatment (inner pages) ───────────────────────────────
+   A faint pool of the zone's light behind each section (alternating sides
+   down the page) plus a hairline divider between sections — quiet structure
+   that never sits as a pattern under body text. Home keeps its own backdrop. */
+
+.site-page:not(.site-page--home) .content-section {
+  position: relative;
+}
+
+.site-page:not(.site-page--home) .content-section::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(
+    var(--pool-size) circle at var(--pool-x, 16%) 6rem,
+    var(--zone-pool),
+    transparent 74%
+  );
+}
+
+.site-page:not(.site-page--home) section.content-section:nth-of-type(even) {
+  --pool-x: 84%;
+}
+
+.site-page:not(.site-page--home) .content-section:not(:last-of-type)::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--zone-line), transparent);
+}
+
+.site-page--team :is(section, footer) {
+  border-color: rgba(119, 231, 255, 0.14) !important;
+}
+
+.site-page--team :is(p, .team-member-card__description) {
+  color: rgba(226, 243, 250, 0.78) !important;
+}
+
+.site-page--team :is(.team-member-card__role, .team-member-carousel__status, .team-member-carousel__nav-index) {
+  color: #8beaff !important;
+}
+
+.site-page--team :is(.team-member-card__domain, .team-member-card__status, .team-contributor-chip, span[class*="rgba(155,19,19"]) {
+  border-color: rgba(139, 234, 255, 0.2) !important;
+  color: #e6fbff !important;
+  background: rgba(8, 30, 46, 0.64) !important;
+}
+
+.site-page--team :is(a[href="/community#community-join"], a[href="mailto:hello@devcell.club"]) {
+  border-color: rgba(139, 234, 255, 0.46) !important;
+  color: #d9fbff !important;
+  background: linear-gradient(135deg, rgba(8, 52, 70, 0.86), rgba(8, 25, 38, 0.88)) !important;
+}
+
+.site-page--team :is(a[href="#join-team"], a[href="/events"], a[href="/community#community-join"]:not(:first-child)) {
+  border-color: rgba(255, 59, 107, 0.28) !important;
+  color: #fee2e2 !important;
+  background: rgba(69, 17, 27, 0.32) !important;
+}
+
+.site-page--team :is(.team-member-carousel__progress-bar) {
+  background: linear-gradient(90deg, #22d3ee, #ff3b6b);
+  box-shadow: 0 0 0.9rem rgba(34, 211, 238, 0.45);
+}
+
+.status-dot,
+.mission-card span[class*="rounded-full"] {
+  box-shadow: 0 0 0.85rem rgba(34, 211, 238, 0.8);
+}
+
+.hero-canvas,
+.static-hero img {
+  filter: brightness(1.2) contrast(1.08) saturate(1.24);
+}
+
+.hero-overlay::before {
+  background:
+    radial-gradient(circle at 52% 36%, rgba(82, 190, 255, 0.18), transparent 27rem),
+    radial-gradient(circle at 22% 28%, rgba(255, 59, 107, 0.08), transparent 20rem),
+    radial-gradient(circle at 80% 32%, rgba(139, 234, 255, 0.1), transparent 24rem) !important;
+  mix-blend-mode: screen;
+  opacity: 0.72;
+}
+
+.hero-vignette {
+  background:
+    radial-gradient(circle at 54% 42%, rgba(34, 211, 238, 0.12) 0%, rgba(2, 14, 24, 0.08) 54%, rgba(0, 0, 0, 0.24) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 44%, rgba(0, 0, 0, 0.14));
+}
+
+.hero-top-fade {
+  height: 7rem;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.34), transparent);
+}
+
+.hero-bottom-fade {
+  height: 9rem;
+  background: linear-gradient(to top, rgba(3, 13, 21, 0.24), transparent);
+}
+
+.cockpit-acquire-callout {
+  position: absolute;
+  right: clamp(1.2rem, 4vw, 3.5rem);
+  bottom: clamp(5rem, 10vh, 7rem);
+  z-index: 14;
+  pointer-events: none;
+  color: #8beaff;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.35;
+  text-align: right;
+  text-transform: uppercase;
+  text-shadow: 0 0 0.85rem rgba(139, 234, 255, 0.62);
+}
+
+.cockpit-acquire-callout span {
+  display: inline-block;
+  border-bottom: 1px solid rgba(139, 234, 255, 0.7);
+  padding: 0 0 0.34rem;
+  box-shadow: 0 0.45rem 0.75rem -0.7rem rgba(139, 234, 255, 0.86);
+}
+
+/*
+ * Hand the hero off to the About section with a light overlay fade.
+ * The first content block overlaps the tail of the hero, so the page
+ * avoids a separate blank transition band.
+ */
+.cockpit-hero,
+.static-hero {
+  background: transparent;
+}
+
+.static-hero img {
+  -webkit-mask-image: linear-gradient(to bottom, #000 66%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 66%, transparent 100%);
+}
+
+.site-page--home #about {
+  position: relative;
+  z-index: 3;
+  margin-top: 0;
+  padding-top: clamp(5.6rem, 8vw, 7rem);
+}
+
+.site-page--home #about::before {
+  position: absolute;
+  top: -15rem;
+  right: -1.5rem;
+  left: -1.5rem;
+  z-index: -1;
+  height: 24rem;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(3, 13, 21, 0.22) 46%,
+      rgba(3, 13, 21, 0.42) 100%
+    ),
+    radial-gradient(circle at 24% 58%, rgba(119, 231, 255, 0.14), transparent 25rem),
+    radial-gradient(circle at 78% 64%, rgba(255, 99, 124, 0.09), transparent 24rem);
+}
+
+@media (max-width: 780px) {
+  .site-page {
+    --pool-size: 24rem;
+  }
+
+  .site-page .content-section {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-page *,
+  .hero-copy__actions a {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

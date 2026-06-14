@@ -1,0 +1,296 @@
+@theme {
+  --font-display: "Rajdhani", "Arial Narrow", sans-serif;
+  --font-mono: "Space Mono", "Courier New", monospace;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-pill: 9999px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Type ramp (Design Direction · move 01) ──────────────────────────
+     A confident display, a comfortable reading size, and a label that's
+     small but never invisible. Two fonts only — Rajdhani + Space Mono.
+     The legibility floor is the single biggest quality lever, so body and
+     label sizes are raised and given dedicated tokens. */
+  --text-display: clamp(2.8rem, 7vw, 5.6rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.045em;
+  --text-heading: 1.7rem;
+  --text-heading--line-height: 1.04;
+  --text-heading--letter-spacing: -0.02em;
+  --text-lead: 1rem;
+  --text-lead--line-height: 1.7;
+  --text-body: 0.94rem;
+  --text-body--line-height: 1.75;
+  --text-label: 0.72rem; /* label floor — never below this */
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.2em;
+}
+
+@theme inline {
+  --color-bg-deep: #020407;
+  --color-accent-cyan: #8beaff;
+  --color-accent-cyan-soft: #77e7ff;
+  /* One red. Collapsed the three that were doing the same job
+     (theme #d81c3d, hot rgba(255,45,85), flat #ef4444) into this single
+     token (Design Direction · move 02). */
+  --color-accent-red: #ff3b6b;
+  --color-accent-pink: #ff637c;
+  --color-accent-green: #77e7ff;
+  --color-text-primary: #f6fbff;
+  /* Legibility floor: dim ≥ 0.78, muted raised from 0.58 → 0.72. */
+  --color-text-dim: rgba(226, 243, 250, 0.82);
+  --color-text-muted: rgba(226, 243, 250, 0.72);
+  --color-border-dim: rgba(161, 229, 255, 0.18);
+  --color-border-subtle: rgba(161, 229, 255, 0.08);
+  --color-border-red: rgba(255, 59, 107, 0.22);
+  --color-card-cyan: rgba(12, 37, 52, 0.72);
+  --color-card-bg: rgba(5, 10, 15, 0.82);
+  --color-card-hover: rgba(17, 53, 71, 0.82);
+  /* Locked spacing scale (Design Direction · move 10): 4 · 8 · 16 · 24 · 48 · 96 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 6rem;
+  --spacing-3xl: 4rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 3rem;
+  --space-6: 6rem;
+}
+
+/* ── Utility layer for complex component patterns ── */
+
+@utility content-section {
+  width: min(calc(100% - 3rem), 72rem);
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 8rem;
+  padding-bottom: 8rem;
+}
+
+/* ── Type ramp utilities (move 01) ──────────────────────────────────────
+   Commit the page to the ramp instead of one-off arbitrary sizes. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+@utility type-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+@utility type-lead {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text-dim);
+}
+
+@utility type-body {
+  font-family: var(--font-mono);
+  font-size: 0.94rem;
+  line-height: 1.75;
+  color: var(--color-text-dim);
+}
+
+@utility type-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+@utility eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-accent-cyan-soft);
+}
+
+/* ── Card hierarchy (move 04) ───────────────────────────────────────────
+   Three tiers so the eye knows where to go. Effects (glow, tilt, sheen)
+   are reserved for the FEATURE tier; standard is a flat panel with a
+   single accent line; list is text-led and minimal. */
+@utility card-feature {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-border-dim);
+  background:
+    linear-gradient(180deg, rgba(224, 242, 254, 0.05), transparent 40%),
+    linear-gradient(145deg, rgba(8, 23, 34, 0.92), rgba(5, 10, 15, 0.92));
+  box-shadow: 0 1.5rem 3.4rem rgba(2, 6, 23, 0.4), inset 0 0 0 1px rgba(224, 242, 254, 0.05);
+}
+
+@utility card-standard {
+  position: relative;
+  border: 1px solid var(--color-border-dim);
+  border-top: 2px solid var(--color-accent-cyan);
+  background: linear-gradient(145deg, rgba(7, 16, 24, 0.86), rgba(5, 10, 15, 0.9));
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+@utility card-standard--red {
+  border-top-color: var(--color-accent-red);
+}
+
+@utility card-list {
+  position: relative;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: transparent;
+}
+
+@utility section-heading {
+  display: grid;
+  grid-template-columns: 1.35fr 0.8fr;
+  gap: 3rem;
+  margin-top: 2rem;
+  align-items: end;
+}
+
+@utility intro-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.8fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+@utility network-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+@utility command-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@utility project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-top: 3rem;
+  border: 1px solid var(--color-border-dim);
+  background: var(--color-border-dim);
+}
+
+@utility card-base {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border-dim);
+  color: #f5fbff;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+@utility card-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent-pink);
+}
+
+@utility card-cursor {
+  display: inline-block;
+  color: var(--color-accent-pink);
+  animation: blink 1s step-end infinite;
+}
+
+@utility cta-arrow {
+  color: var(--color-accent-pink);
+}
+
+@utility status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem;
+  border: 1px solid rgba(161, 229, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(206, 244, 255, 0.82);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@utility status-pill-dot {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: #77e7ff;
+  box-shadow: 0 0 0.6rem rgba(119, 231, 255, 0.8);
+}
+
+@utility chip {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@utility chip--on {
+  background: #77e7ff;
+  box-shadow: 0 0 0.6rem rgba(119, 231, 255, 0.6);
+}
+
+@utility event-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 2.5rem;
+  margin-top: 2rem;
+  padding: 2rem;
+  align-items: center;
+  border: 1px solid var(--color-border-dim);
+  background: linear-gradient(100deg, rgba(15, 44, 57, 0.42), rgba(7, 11, 16, 0.86)), #060b10;
+}
+
+@utility primary-link {
+  display: inline-flex;
+  margin-top: 2rem;
+  padding: 1rem 1.3rem;
+  border: 1px solid rgba(158, 236, 255, 0.46);
+  color: #9cecff;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(14, 59, 72, 0.44);
+  transition: color 180ms ease, background 180ms ease;
+}
+
+@utility text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #9cecff;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 180ms ease;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}

@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "./tailwind-theme.css";
+
+:root {
+  --scrollbar-compensation: 0px;
+}
+
+body {
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@media (min-width: 768px) {
+  .visual-center-offset {
+    position: relative;
+    left: calc(var(--scrollbar-compensation) / 2);
+  }
+}

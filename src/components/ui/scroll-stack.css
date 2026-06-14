@@ -1,0 +1,27 @@
+.dev-scroll-stack {
+  display: grid;
+  gap: 1.2rem;
+  margin-top: 2.8rem;
+}
+
+.dev-scroll-stack__item {
+  position: sticky;
+  top: calc(var(--dev-nav-height) + 1.5rem + (var(--stack-index) * 0.9rem));
+  z-index: calc(20 - var(--stack-index));
+  transform: scale(calc(1 - (var(--stack-index) * 0.03)));
+  transform-origin: top center;
+}
+
+@media (max-width: 780px) {
+  .dev-scroll-stack__item {
+    position: relative;
+    top: auto;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-scroll-stack__item {
+    transform: none;
+  }
+}
