@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 import * as THREE from "three";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { initDroneGyro } from "./droneGyro";
+import type { DroneGyroController } from "./droneGyro";
 import "./HomeDroneHero.css";
 
 type PointerTarget = {
@@ -334,7 +336,11 @@ function HimalayanRidge() {
 export function HomeDroneHero() {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
+  const tiltRef = useRef<HTMLDivElement | null>(null);
   const pointerTarget = useRef<PointerTarget>({ x: 0, y: 0 });
+  // Mobile-only gyro tilt. The button is shown only when the platform requires
+  // a permission gesture (iOS); on Android/desktop it stays hidden.
+  const [showTiltButton, setShowTiltButton] = useState(false);
   const isInView = useInView(sectionRef, {
     margin: "320px 0px 320px 0px",
   });
@@ -378,6 +384,48 @@ export function HomeDroneHero() {
     return () => window.removeEventListener("pointermove", updatePointer);
   }, [isDroneActive, reducedMotion]);
 
+  // Mobile-only gyro tilt. Separate from the desktop pointer parallax above:
+  // it owns its own listener + rAF loop, transforms only the canvas wrapper,
+  // and self-gates (mobile + reduced-motion + IntersectionObserver on the
+  // section), so it never touches the cockpit. Re-run only when the scene is
+  // mounted so the canvas wrapper exists as the transform target.
+  const gyroRef = useRef<DroneGyroController | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const target = tiltRef.current;
+
+    if (!hasPreparedScene || !section || !target) {
+      return;
+    }
+
+    const controller = initDroneGyro({ section, target });
+    gyroRef.current = controller;
+
+    if (controller?.needsPermissionPrompt) {
+      setShowTiltButton(true);
+    }
+
+    return () => {
+      controller?.destroy();
+      gyroRef.current = null;
+      setShowTiltButton(false);
+    };
+  }, [hasPreparedScene]);
+
+  const handleEnableTilt = async () => {
+    const controller = gyroRef.current;
+
+    if (!controller) {
+      return;
+    }
+
+    if (await controller.requestPermissionIfNeeded()) {
+      controller.start();
+      setShowTiltButton(false);
+    }
+  };
+
   return (
     <motion.section
       aria-labelledby="home-drone-heading"
@@ -389,26 +437,28 @@ export function HomeDroneHero() {
       <HimalayanRidge />
       <div className="home-drone-hero__inner">
         <div className="home-drone-hero__visual" aria-hidden="true">
-          {hasPreparedScene ? (
-            <Canvas
-              aria-hidden="true"
-              camera={{ position: [-2.5, 1.2, 10], fov: 28 }}
-              dpr={[0.8, 1.15]}
-              frameloop={isDroneActive ? "always" : "demand"}
-              gl={{
-                alpha: true,
-                antialias: false,
-                powerPreference: "high-performance",
-              }}
-              style={{ pointerEvents: "none" }}
-            >
-              <DroneScene
-                active={isDroneActive}
-                pointerTarget={pointerTarget}
-                reducedMotion={reducedMotion}
-              />
-            </Canvas>
-          ) : null}
+          <div className="home-drone-hero__tilt" ref={tiltRef}>
+            {hasPreparedScene ? (
+              <Canvas
+                aria-hidden="true"
+                camera={{ position: [-2.5, 1.2, 10], fov: 28 }}
+                dpr={[0.8, 1.15]}
+                frameloop={isDroneActive ? "always" : "demand"}
+                gl={{
+                  alpha: true,
+                  antialias: false,
+                  powerPreference: "high-performance",
+                }}
+                style={{ pointerEvents: "none" }}
+              >
+                <DroneScene
+                  active={isDroneActive}
+                  pointerTarget={pointerTarget}
+                  reducedMotion={reducedMotion}
+                />
+              </Canvas>
+            ) : null}
+          </div>
           <motion.div
             className="home-drone-hero__unit-callout"
             style={{ opacity: calloutOpacity }}
@@ -421,6 +471,16 @@ export function HomeDroneHero() {
             <span>Wireframe / Cyan</span>
           </div>
         </div>
+
+        {showTiltButton ? (
+          <button
+            className="home-drone-hero__tilt-enable"
+            onClick={handleEnableTilt}
+            type="button"
+          >
+            Enable tilt
+          </button>
+        ) : null}
 
         <div className="home-drone-hero__copy">
           <p className="home-drone-hero__eyebrow">
