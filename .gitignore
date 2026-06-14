@@ -1,59 +1,87 @@
+# OS files
 .DS_Store
 Thumbs.db
+
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+dist-ssr/
 build/
+*.tsbuildinfo
+
+# Vite/tool caches
 .vite/
 .cache/
+.cache-loader
 .npm-cache/
 .parcel-cache/
 .turbo/
-.turbo/**/*
-.cache/*
 .screenshots/
+
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Test and coverage output
 coverage/
-coverage/**/*
 *.lcov
-*.tsbuildinfo
+
+# Environment files
 .env
-.env.*.local
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
-/.idea/
+.env.*.local
+*.local
+
+# Editor and local workspace metadata
+.idea/
 .vscode/
+.codex/
+.claude/**
+!.claude/
+!.claude/**/
+!.claude/**/*.md
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.swp
-/.DS_Store
-/.vagrant/
+
+# Generated mobile frame set — regenerated from finalphotos/ at build time
+# via `npm run frames:mobile`. Source + script are committed; output is not.
+public/cockpit-sequence-mobile/
+
+# Generated design/video scratch output
+.tmp/
+.design_handoff/**
+!.design_handoff/
+!.design_handoff/**/
+!.design_handoff/**/*.md
+_design_dl/
+tmp-video-frames/
+tmp-video-frames-*/
+
+# Python helpers
 .venv/
 venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .mypy_cache/
-/.pnp*
-/.pnp.js
-.cache-loader
-*.log
-.tmp/
-.codex/
-.claude/
-.design_handoff/
-_design_dl/
-tmp-video-frames/
-tmp-video-frames-*/
+
+# Package manager artifacts
+.pnp*
+.pnp.js
+
+# Deployment
 .vercel/
 .netlify/
-/.firebase/
-dist-ssr/
-*.local
+.firebase/
+
+# Local VM/dev tooling
+.vagrant/

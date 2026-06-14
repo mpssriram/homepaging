@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run frames:mobile && tsc -b && vite build",
     "prepare:cockpit": "node scripts/prepare-cockpit-sequence.mjs",
     "frames:mobile": "node scripts/generate-mobile-frames.mjs",
     "typecheck": "tsc -b --pretty false",
