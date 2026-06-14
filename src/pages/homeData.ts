@@ -1,22 +1,3 @@
-export const homeStats = [
-  {
-    label: "Build nights",
-    value: "Open",
-  },
-  {
-    label: "Projects",
-    value: "Active",
-  },
-  {
-    label: "Reviews",
-    value: "Shared",
-  },
-  {
-    label: "Community",
-    value: "Growing",
-  },
-];
-
 export const homeSpecs = [
   {
     label: "Home base",
@@ -60,30 +41,11 @@ export const homePrograms = [
   },
 ];
 
-export const featuredWork = {
-  title: "Project proof belongs here",
-  stack: "Screenshot / demo / write-up",
-  status: "Awaiting real build",
+export const workPreview = {
+  title: "Projects are on the way",
   description:
-    "This slot should use a real Dev Cell project screenshot, demo link, or public write-up. Until then, it stays honest instead of pretending a project exists.",
+    "We are early. As students finish builds, workshops, and open-source contributions, they will show up here with real screenshots and write-ups.",
 };
-
-export const recentWork = [
-  {
-    title: "Project slot",
-    stack: "Add real stack",
-    status: "Needs source",
-    description:
-      "Add a real student project here once you have the name, screenshot, and short outcome.",
-  },
-  {
-    title: "Build log slot",
-    stack: "Add real tools",
-    status: "Needs source",
-    description:
-      "Use this for a real workshop output, open-source contribution, or campus tool.",
-  },
-];
 
 export const waysIn = [
   {
@@ -115,7 +77,7 @@ export const waysIn = [
     description:
       "Websites, tools, dashboards, and open-source builds by students.",
     href: "/projects",
-    cta: "Browse the shipyard",
+    cta: "See projects",
   },
   {
     number: "05",

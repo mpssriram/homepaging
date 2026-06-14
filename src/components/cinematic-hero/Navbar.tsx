@@ -4,6 +4,7 @@ import {
   useScroll,
 } from "framer-motion";
 import { useState } from "react";
+import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DecryptedText } from "../ui/DecryptedText";
 
@@ -12,6 +13,10 @@ export function Navbar() {
     window.location.pathname.replace(/\/+$/, "") || "/";
   const isInternalPage = normalizedPath !== "/";
   const reducedMotion = useReducedMotion();
+  const isMobileViewport = useMobileViewport();
+  // Drop the always-running glow/pulse loops on mobile and when the user
+  // prefers reduced motion; keep brand, menu, and the Join CTA.
+  const calmMotion = reducedMotion || isMobileViewport;
   const { scrollY } = useScroll();
   const [isPinned, setIsPinned] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -91,14 +96,18 @@ export function Navbar() {
           whileHover={reducedMotion ? undefined : { x: 2 }}
         >
           <motion.span
-            animate={{
-              boxShadow: [
-                "0 0 0.8rem rgba(139, 234, 255, 0.55)",
-                "0 0 1.3rem rgba(139, 234, 255, 0.95)",
-                "0 0 0.8rem rgba(139, 234, 255, 0.55)",
-              ],
-              scale: [1, 1.16, 1],
-            }}
+            animate={
+              calmMotion
+                ? undefined
+                : {
+                    boxShadow: [
+                      "0 0 0.8rem rgba(139, 234, 255, 0.55)",
+                      "0 0 1.3rem rgba(139, 234, 255, 0.95)",
+                      "0 0 0.8rem rgba(139, 234, 255, 0.55)",
+                    ],
+                    scale: [1, 1.16, 1],
+                  }
+            }
             className="h-[0.48rem] w-[0.48rem] rounded-full bg-accent-cyan"
             transition={{
               duration: 2.4,
@@ -169,7 +178,7 @@ export function Navbar() {
           <span className="relative z-[1]">Join</span>
           <motion.span
             animate={
-              reducedMotion ? undefined : { opacity: [0.2, 0.55, 0.2] }
+              calmMotion ? undefined : { opacity: [0.2, 0.55, 0.2] }
             }
             className="absolute inset-0 rounded-[999px] border border-[rgba(255,235,238,0.12)]"
             transition={{

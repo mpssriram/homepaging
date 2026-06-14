@@ -10,15 +10,9 @@ import {
 import { CockpitHero } from "../components/cinematic-hero/CockpitHero";
 import { Magnet } from "../components/ui/Magnet";
 import { ShinyText } from "../components/ui/ShinyText";
+import { useMobileViewport } from "../hooks/useMobileViewport";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import {
-  featuredWork,
-  homePrograms,
-  homeSpecs,
-  homeStats,
-  recentWork,
-  waysIn,
-} from "./homeData";
+import { homePrograms, homeSpecs, waysIn, workPreview } from "./homeData";
 
 const HomeDroneHero = lazy(
   () => import("../components/cinematic-hero/HomeDroneHero"),
@@ -115,42 +109,15 @@ function SectionIntro({
   );
 }
 
-function TelemetryStrip() {
-  return (
-    <section
-      aria-label="Dev Cell telemetry"
-      className="relative border-y border-[rgba(139,234,255,0.14)] bg-[rgba(2,6,12,0.48)] px-6 backdrop-blur-[10px]"
-    >
-      <div className="mx-auto grid w-[min(100%,72rem)] gap-5 py-5 lg:grid-cols-[auto_1fr_auto] lg:items-center">
-        <span className="type-label inline-flex items-center gap-3 text-accent-cyan-soft">
-          <span className="h-[0.42rem] w-[0.42rem] rounded-full bg-[#6ee7a8] shadow-[0_0_0.75rem_rgba(110,231,168,0.9)]" />
-          Signal route / home
-        </span>
-        <div className="grid gap-3 text-[0.72rem] uppercase tracking-[0.18em] text-text-muted sm:grid-cols-2 lg:grid-cols-4 lg:text-center">
-          {homeStats.map((stat) => (
-            <span key={stat.label}>
-              <span className="text-accent-cyan">{stat.value}</span>{" "}
-              {stat.label}
-            </span>
-          ))}
-        </div>
-        <span className="type-label text-text-muted lg:text-right">
-          Real proof pending
-        </span>
-      </div>
-    </section>
-  );
-}
-
 function AboutSection() {
   return (
     <section className="content-section" id="about">
       <div className="intro-grid">
         <RevealBlock>
-          <p className="eyebrow text-accent-pink">Section 02 / What we are</p>
+          <p className="eyebrow text-accent-pink">What we are</p>
           <h2 className="type-display mt-5">
             A small room of students who{" "}
-            <span className="text-accent-cyan">ship.</span>
+            <span className="text-accent-cyan">build.</span>
           </h2>
         </RevealBlock>
         <RevealBlock className="pt-2 md:pt-8" delay={0.08}>
@@ -192,13 +159,13 @@ function ProgramsSection() {
       className="content-section pt-0"
     >
       <SectionIntro
-        eyebrow="Section 03 / What we run"
+        eyebrow="What we run"
         id="programs-heading"
-        text="Three simple entry points replace the old repeated link grids: a clear loop for learning, contributing, and trying ideas."
+        text="Three simple ways to get involved: learn by doing, contribute to real code, and try out your own ideas."
         title={
           <>
-            Three programs, one loop: build, review,{" "}
-            <span className="text-accent-cyan">ship again.</span>
+            Three programs, one{" "}
+            <span className="text-accent-cyan">loop.</span>
           </>
         }
       />
@@ -246,100 +213,28 @@ function ProgramsSection() {
 }
 
 function WorkPreview() {
-  const reducedMotion = useReducedMotion();
-
   return (
     <section aria-labelledby="work-heading" className="content-section pt-0">
       <RevealBlock>
         <div className="flex flex-col gap-5 border-b border-[rgba(139,234,255,0.16)] pb-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="eyebrow text-accent-pink">
-              Section 04 / Recent work
-            </p>
-            <h2 className="mt-4 font-display text-[clamp(2.4rem,5.8vw,4.4rem)] font-bold uppercase leading-[0.94] tracking-[-0.045em]">
-              Proof from the cell.
+            <p className="eyebrow text-accent-pink">Projects</p>
+            <h2
+              className="mt-4 font-display text-[clamp(2.1rem,5.8vw,4.4rem)] font-bold uppercase leading-[0.94] tracking-[-0.045em]"
+              id="work-heading"
+            >
+              {workPreview.title}
             </h2>
           </div>
           <a className="text-link" href="/projects">
-            All projects <span aria-hidden="true">-&gt;</span>
+            See projects <span aria-hidden="true">-&gt;</span>
           </a>
         </div>
       </RevealBlock>
 
-      <div className="mt-9 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-        <RevealBlock>
-          <motion.article
-            className="card-feature p-5"
-            whileHover={reducedMotion ? undefined : { y: -3 }}
-          >
-            <div className="relative min-h-[17rem] overflow-hidden border border-[rgba(139,234,255,0.12)] bg-[linear-gradient(135deg,#0b2a3c,#08121d)]">
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 bg-[radial-gradient(circle_at_30%_38%,rgba(139,234,255,0.25),transparent_48%),radial-gradient(circle_at_78%_72%,rgba(255,59,107,0.18),transparent_55%)]"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute inset-4 border border-[rgba(139,234,255,0.11)]"
-              />
-              <span className="type-label absolute bottom-4 left-4 text-text-muted">
-                Project proof slot / replace with real screenshot
-              </span>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <span className="type-label border border-[rgba(139,234,255,0.18)] px-3 py-1.5 text-accent-cyan-soft">
-                {featuredWork.stack}
-              </span>
-              <span className="inline-flex items-center gap-2 text-[0.7rem] uppercase tracking-[0.18em] text-accent-pink">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-red shadow-[0_0_0.6rem_rgba(255,59,107,0.8)]" />
-                {featuredWork.status}
-              </span>
-            </div>
-            <h3 className="mt-4 font-display text-[clamp(2.1rem,4vw,2.8rem)] font-bold uppercase leading-[0.96] tracking-[-0.035em]">
-              {featuredWork.title}
-            </h3>
-            <p className="type-body mt-4 max-w-[42rem]">
-              {featuredWork.description}
-            </p>
-            <a className="text-link mt-6" href="/projects">
-              Read the build log <span aria-hidden="true">-&gt;</span>
-            </a>
-          </motion.article>
-        </RevealBlock>
-
-        <div className="grid gap-5">
-          {recentWork.map((project, index) => (
-            <RevealBlock delay={index * 0.08} key={project.title}>
-              <motion.article
-                className="card-standard grid gap-4 p-5 sm:grid-cols-[7.5rem_1fr]"
-                whileHover={reducedMotion ? undefined : { y: -2 }}
-              >
-                <div className="relative min-h-[7.5rem] overflow-hidden border border-[rgba(139,234,255,0.1)] bg-[linear-gradient(135deg,#0d1f2b,#061018)]">
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-[radial-gradient(circle,rgba(139,234,255,0.18),transparent_62%)]"
-                  />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="type-label text-accent-cyan-soft">
-                      {project.stack}
-                    </span>
-                    <span className="text-[0.68rem] uppercase tracking-[0.18em] text-text-muted">
-                      {project.status}
-                    </span>
-                  </div>
-                  <h3 className="mt-3 font-display text-[1.8rem] font-semibold uppercase leading-none tracking-[-0.025em]">
-                    {project.title}
-                  </h3>
-                  <p className="mt-3 text-[0.86rem] leading-[1.7] text-text-dim">
-                    {project.description}
-                  </p>
-                </div>
-              </motion.article>
-            </RevealBlock>
-          ))}
-        </div>
-      </div>
+      <RevealBlock>
+        <p className="type-body mt-6 max-w-[42rem]">{workPreview.description}</p>
+      </RevealBlock>
     </section>
   );
 }
@@ -349,11 +244,7 @@ function WaysInSection() {
 
   return (
     <section aria-labelledby="ways-heading" className="content-section pt-0">
-      <SectionIntro
-        eyebrow="Section 05 / Ways in"
-        id="ways-heading"
-        title="Pick a door."
-      />
+      <SectionIntro eyebrow="Ways in" id="ways-heading" title="Pick a door." />
 
       <div className="mt-8 border-t border-[rgba(139,234,255,0.16)]">
         {waysIn.map((way, index) => (
@@ -447,12 +338,14 @@ function JoinSection() {
 }
 
 export function HomePage() {
+  const isMobileViewport = useMobileViewport();
+
   return (
     <div className="site-page site-page--home cinematic-page">
       <main className="cinematic-page__content">
         <CockpitHero />
-        <DeferredHomeDroneHero />
-        <TelemetryStrip />
+        {/* The R3F drone scene is desktop-only; mobile keeps a single light hero. */}
+        {!isMobileViewport && <DeferredHomeDroneHero />}
         <AboutSection />
         <ProgramsSection />
         <WorkPreview />

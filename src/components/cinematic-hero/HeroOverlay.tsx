@@ -9,6 +9,7 @@ type HeroOverlayProps = {
   cueOpacity?: MotionValue<number>;
   overlayOpacity?: MotionValue<number>;
   hideScrollCue?: boolean;
+  minimal?: boolean;
 };
 
 export function HeroOverlay({
@@ -16,6 +17,7 @@ export function HeroOverlay({
   cueOpacity,
   overlayOpacity,
   hideScrollCue = false,
+  minimal = false,
 }: HeroOverlayProps) {
   return (
     <motion.div className="hero-overlay" style={{ opacity: overlayOpacity }}>
@@ -23,9 +25,13 @@ export function HeroOverlay({
       <div className="hero-vignette" aria-hidden="true" />
       <div className="hero-top-fade" aria-hidden="true" />
       <div className="hero-bottom-fade" aria-hidden="true" />
-      <div className="hud-line hud-line-left" aria-hidden="true" />
-      <div className="hud-line hud-line-right" aria-hidden="true" />
-      <CockpitAcquireCallout opacity={acquireOpacity} />
+      {!minimal && (
+        <>
+          <div className="hud-line hud-line-left" aria-hidden="true" />
+          <div className="hud-line hud-line-right" aria-hidden="true" />
+          <CockpitAcquireCallout opacity={acquireOpacity} />
+        </>
+      )}
       {!hideScrollCue && <ScrollCue opacity={cueOpacity} />}
     </motion.div>
   );

@@ -6,43 +6,23 @@ import {
 } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useImagePreloader } from "../../hooks/useImagePreloader";
+import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DevLoader } from "../ui/DevLoader";
 import {
   clamp,
   COCKPIT_FRAME_COUNT,
   getCockpitFrameSrc,
+  getCockpitMobileFrameSrc,
 } from "../../lib/cinematicSequence";
 import { CockpitCanvasSequence } from "./CockpitCanvasSequence";
 import { HeroOverlay } from "./HeroOverlay";
 
-const MOBILE_MAX_WIDTH_QUERY = "(max-width: 640px)";
 const MOBILE_SEQUENCE_START_FRAME = 160;
 const MOBILE_SEQUENCE_END_FRAME = 200;
 
-function useMobileViewport() {
-  const [isMobileViewport, setIsMobileViewport] = useState(() =>
-    typeof window === "undefined"
-      ? false
-      : window.matchMedia(MOBILE_MAX_WIDTH_QUERY).matches,
-  );
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(MOBILE_MAX_WIDTH_QUERY);
-    const update = () => setIsMobileViewport(mediaQuery.matches);
-
-    update();
-    mediaQuery.addEventListener("change", update);
-
-    return () => mediaQuery.removeEventListener("change", update);
-  }, []);
-
-  return isMobileViewport;
-}
-
 export function CockpitHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const [frameIndex, setFrameIndex] = useState(1);
   const reducedMotion = useReducedMotion();
   const isMobileViewport = useMobileViewport();
   const shouldUseStaticFallback = reducedMotion;
@@ -51,6 +31,13 @@ export function CockpitHero() {
     ? MOBILE_SEQUENCE_END_FRAME
     : COCKPIT_FRAME_COUNT;
   const frameStep = isMobileViewport ? 6 : 2;
+  const getFrameSrc = isMobileViewport
+    ? getCockpitMobileFrameSrc
+    : getCockpitFrameSrc;
+  // Scroll progress is written here every frame and read by the canvas rAF
+  // loop, so the cockpit sequence never drives a React re-render.
+  const frameIndexRef = useRef(sequenceStartFrame);
+  const [hasEntered, setHasEntered] = useState(false);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
@@ -61,21 +48,15 @@ export function CockpitHero() {
     [0.82, 0.9, 1],
     [0, 1, 1],
   );
-  const overlayOpacity = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [1, 1],
-  );
-  const { isInitialFrameReady, getNearestLoadedFrame } =
-    useImagePreloader({
-      frameCount: COCKPIT_FRAME_COUNT,
-      getFrameSrc: getCockpitFrameSrc,
-      enabled: !shouldUseStaticFallback,
-      batchSize: isMobileViewport ? 2 : 4,
-      frameStep,
-      startFrame: sequenceStartFrame,
-      endFrame: sequenceEndFrame,
-    });
+  const { isInitialFrameReady, getNearestLoadedFrame } = useImagePreloader({
+    frameCount: COCKPIT_FRAME_COUNT,
+    getFrameSrc,
+    enabled: !shouldUseStaticFallback,
+    batchSize: isMobileViewport ? 2 : 4,
+    frameStep,
+    startFrame: sequenceStartFrame,
+    endFrame: sequenceEndFrame,
+  });
 
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
     if (shouldUseStaticFallback) {
@@ -86,25 +67,31 @@ export function CockpitHero() {
     const availableFrames = sequenceEndFrame - sequenceStartFrame;
     const rawFrame =
       Math.round(sequenceProgress * availableFrames) + sequenceStartFrame;
-    const nextFrame = clamp(rawFrame, sequenceStartFrame, sequenceEndFrame);
-
-    setFrameIndex((currentFrame) =>
-      currentFrame === nextFrame ? currentFrame : nextFrame,
+    frameIndexRef.current = clamp(
+      rawFrame,
+      sequenceStartFrame,
+      sequenceEndFrame,
     );
+
+    if (!hasEntered && progress > 0.02) {
+      setHasEntered(true);
+    }
   });
 
   useEffect(() => {
-    setFrameIndex(sequenceStartFrame);
+    frameIndexRef.current = sequenceStartFrame;
   }, [sequenceStartFrame]);
 
   if (shouldUseStaticFallback) {
     return (
       <section className="static-hero" id="top" ref={sectionRef}>
+        {/* prefers-reduced-motion: one representative frame, no scrub, on every
+            viewport. The lightweight mobile asset is plenty for a still image. */}
         <img
-          src={getCockpitFrameSrc(MOBILE_SEQUENCE_START_FRAME)}
+          src={getCockpitMobileFrameSrc(MOBILE_SEQUENCE_START_FRAME)}
           alt="Futuristic cockpit overlooking a cyber city"
         />
-        <HeroOverlay acquireOpacity={1} hideScrollCue />
+        <HeroOverlay acquireOpacity={1} hideScrollCue minimal={isMobileViewport} />
       </section>
     );
   }
@@ -113,10 +100,11 @@ export function CockpitHero() {
     <section className="cockpit-hero" id="top" ref={sectionRef}>
       <motion.div className="sticky-viewport">
         <CockpitCanvasSequence
-          frameIndex={frameIndex}
+          frameIndexRef={frameIndexRef}
           frameCount={COCKPIT_FRAME_COUNT}
           getNearestLoadedFrame={getNearestLoadedFrame}
           maxDevicePixelRatio={isMobileViewport ? 1 : 1.5}
+          fitMode={isMobileViewport ? "contain" : "cover"}
         />
         <motion.div
           className="canvas-loader"
@@ -129,8 +117,8 @@ export function CockpitHero() {
         <HeroOverlay
           acquireOpacity={acquireOpacity}
           cueOpacity={cueOpacity}
-          overlayOpacity={overlayOpacity}
-          hideScrollCue={frameIndex > 4}
+          hideScrollCue={isMobileViewport || hasEntered}
+          minimal={isMobileViewport}
         />
       </motion.div>
     </section>

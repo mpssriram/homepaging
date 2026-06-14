@@ -1,77 +1,59 @@
-# OS files
 .DS_Store
 Thumbs.db
-
-# Dependencies
 node_modules/
-
-# Build output
 dist/
-dist-ssr/
 build/
-*.tsbuildinfo
-
-# Tool caches
 .vite/
 .cache/
-.cache-loader
 .npm-cache/
 .parcel-cache/
 .turbo/
+.turbo/**/*
+.cache/*
 .screenshots/
-.tmp/
-
-# Generated design/video scratch output
-.design_handoff/
-_design_dl/
-tmp-video-frames/
-tmp-video-frames-*/
-
-# Logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Test and coverage output
 coverage/
+coverage/**/*
 *.lcov
-
-# Environment files
+*.tsbuildinfo
 .env
-.env.local
 .env.*.local
-*.local
-
-# Editor and local workspace metadata
-.idea/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+/.idea/
 .vscode/
-.codex/
-.claude/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.swp
-
-# Python helpers
+/.DS_Store
+/.vagrant/
 .venv/
 venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .mypy_cache/
-
-# Package manager artifacts
-.pnp*
-.pnp.js
-
-# Deployment
+/.pnp*
+/.pnp.js
+.cache-loader
+*.log
+.tmp/
+.codex/
+.claude/
+.design_handoff/
+_design_dl/
+tmp-video-frames/
+tmp-video-frames-*/
 .vercel/
 .netlify/
-.firebase/
-
-# Local VM/dev tooling
-.vagrant/
+/.firebase/
+dist-ssr/
+*.local
