@@ -52,8 +52,11 @@ coverage/
 *.sln
 *.swp
 
-# Generated mobile frame set — regenerated from finalphotos/ at build time
-# via `npm run frames:mobile`. Source + script are committed; output is not.
+# Generated mobile frame set — regenerated from for_mobile_version/ at build
+# time via `npm run frames:mobile`. Source + script are committed; output is not.
+public/cockpit-mobile/
+
+# Legacy generated mobile set (superseded by cockpit-mobile), ignored if present.
 public/cockpit-sequence-mobile/
 
 # Generated design/video scratch output

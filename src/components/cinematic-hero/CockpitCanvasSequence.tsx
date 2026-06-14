@@ -5,73 +5,33 @@ import { clamp } from "../../lib/cinematicSequence";
 
 type FitMode = "cover" | "contain";
 
-// Art-directed framing for the cover path. focalX/focalY pick which window of a
-// wide frame survives the crop (0 = left/top edge, 0.5 = center, 1 = right/bottom);
-// zoom > 1 pushes further into the scene. Defaults reproduce a plain centered
-// cover, so the desktop path is unchanged unless an override is supplied.
-export type Framing = {
-  focalX?: number;
-  focalY?: number;
-  zoom?: number;
-};
-
 type CockpitCanvasSequenceProps = {
   frameIndexRef: MutableRefObject<number>;
   frameCount: number;
   getNearestLoadedFrame: (targetFrame: number) => LoadedFrame | null;
   maxDevicePixelRatio?: number;
   fitMode?: FitMode;
-  framing?: Framing;
-  backgroundColor?: string;
 };
 
+// Centered fit. "cover" fills the canvas (cropping the longer axis); "contain"
+// fits the whole image (leaving bands on the shorter axis). Both preserve the
+// image's aspect ratio — the frame is never stretched.
 function computeDrawRect(
   image: HTMLImageElement,
   canvasWidth: number,
   canvasHeight: number,
   fitMode: FitMode,
-  framing: Framing,
 ) {
-  if (fitMode === "cover") {
-    // Cover-fill the canvas, then optionally zoom in, then pan to the focal
-    // point. With focal 0.5/0.5 and zoom 1 this is identical to a centered cover.
-    const focalX = framing.focalX ?? 0.5;
-    const focalY = framing.focalY ?? 0.5;
-    const zoom = framing.zoom ?? 1;
-    const scale =
-      Math.max(canvasWidth / image.width, canvasHeight / image.height) * zoom;
-    const drawWidth = image.width * scale;
-    const drawHeight = image.height * scale;
-    return {
-      drawWidth,
-      drawHeight,
-      offsetX: (canvasWidth - drawWidth) * focalX,
-      offsetY: (canvasHeight - drawHeight) * focalY,
-    };
-  }
-
-  const canvasRatio = canvasWidth / canvasHeight;
-  const imageRatio = image.width / image.height;
-  // For "contain" the image fits entirely with letterboxing on the shorter axis.
-  const fillHeight = imageRatio <= canvasRatio;
-
-  if (fillHeight) {
-    const drawHeight = canvasHeight;
-    const drawWidth = image.width * (canvasHeight / image.height);
-    return {
-      drawWidth,
-      drawHeight,
-      offsetX: (canvasWidth - drawWidth) / 2,
-      offsetY: 0,
-    };
-  }
-
-  const drawWidth = canvasWidth;
-  const drawHeight = image.height * (canvasWidth / image.width);
+  const scale =
+    fitMode === "cover"
+      ? Math.max(canvasWidth / image.width, canvasHeight / image.height)
+      : Math.min(canvasWidth / image.width, canvasHeight / image.height);
+  const drawWidth = image.width * scale;
+  const drawHeight = image.height * scale;
   return {
     drawWidth,
     drawHeight,
-    offsetX: 0,
+    offsetX: (canvasWidth - drawWidth) / 2,
     offsetY: (canvasHeight - drawHeight) / 2,
   };
 }
@@ -82,14 +42,7 @@ export function CockpitCanvasSequence({
   getNearestLoadedFrame,
   maxDevicePixelRatio = 1.5,
   fitMode = "cover",
-  framing,
-  backgroundColor = "#03060c",
 }: CockpitCanvasSequenceProps) {
-  // Keep the framing object stable across renders so the draw effect's deps
-  // don't churn; the values are simple scalars supplied by the parent.
-  const focalX = framing?.focalX;
-  const focalY = framing?.focalY;
-  const zoom = framing?.zoom;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const lastImageRef = useRef<HTMLImageElement | null>(null);
 
@@ -161,7 +114,6 @@ export function CockpitCanvasSequence({
         width,
         height,
         fitMode,
-        { focalX, focalY, zoom },
       );
 
       context.setTransform(1, 0, 0, 1, 0, 0);
@@ -169,8 +121,25 @@ export function CockpitCanvasSequence({
       context.imageSmoothingQuality = "medium";
 
       if (fitMode === "contain") {
-        // Fill letterbox space with an intentional cinematic backdrop.
-        context.fillStyle = backgroundColor;
+        // The wide 16:9 frame can't fill a portrait stage without cropping the
+        // cockpit, so it is contained (whole frame visible, never stretched).
+        // The empty bands are filled with a blurred, darkened cover of the same
+        // frame so the scene reads as cinematic depth instead of a floating clip.
+        const cover = computeDrawRect(loadedFrame.image, width, height, "cover");
+        const blur = Math.max(12, Math.round(height * 0.05));
+
+        context.clearRect(0, 0, width, height);
+        context.filter = `blur(${blur}px) brightness(0.45) saturate(1.1)`;
+        context.drawImage(
+          loadedFrame.image,
+          cover.offsetX,
+          cover.offsetY,
+          cover.drawWidth,
+          cover.drawHeight,
+        );
+        context.filter = "none";
+        // A subtle scrim deepens the bands and hides the blur's bright edges.
+        context.fillStyle = "rgba(3, 6, 12, 0.35)";
         context.fillRect(0, 0, width, height);
       } else {
         context.clearRect(0, 0, width, height);
@@ -238,16 +207,7 @@ export function CockpitCanvasSequence({
       document.removeEventListener("visibilitychange", onVisibilityChange);
       stop();
     };
-  }, [
-    backgroundColor,
-    fitMode,
-    focalX,
-    focalY,
-    zoom,
-    frameCount,
-    frameIndexRef,
-    getNearestLoadedFrame,
-  ]);
+  }, [fitMode, frameCount, frameIndexRef, getNearestLoadedFrame]);
 
   return <canvas ref={canvasRef} aria-hidden="true" className="hero-canvas" />;
 }
