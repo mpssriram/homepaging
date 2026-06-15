@@ -1,8 +1,14 @@
 export const COCKPIT_FRAME_COUNT = 240;
 
-// Dedicated mobile sequence (AUTOx480, ~853x480 16:9) served from /cockpit-mobile,
-// prepared by scripts/prepare-mobile-frames.mjs. It is its own shorter set, so it
-// carries its own frame count rather than reusing the desktop one.
+// Portrait mobile sequence (720x1280 / 1080x1920, true vertical) served from
+// /cockpit-mobile-portrait, prepared by scripts/prepare-mobile-portrait-frames.mjs.
+// This is the default mobile experience: the frames are already portrait, so they
+// fill a phone screen with "cover" and never read like a landscape clip.
+export const COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT = 120;
+
+// Legacy landscape mobile sequence (AUTOx480, ~853x480 16:9) served from
+// /cockpit-mobile, prepared by scripts/prepare-mobile-frames.mjs. Retained as a
+// fallback (e.g. the reduced-motion still) now that the portrait set is primary.
 export const COCKPIT_MOBILE_FRAME_COUNT = 120;
 
 const frameName = (index: number, ext: "webp" | "jpg") =>
@@ -11,14 +17,18 @@ const frameName = (index: number, ext: "webp" | "jpg") =>
 export const getCockpitFrameSrc = (index: number) =>
   `/cockpit-sequence/${frameName(index, "webp")}`;
 
+export const getCockpitMobilePortraitFrameSrc = (index: number) =>
+  `/cockpit-mobile-portrait/${frameName(index, "jpg")}`;
+
 export const getCockpitMobileFrameSrc = (index: number) =>
   `/cockpit-mobile/${frameName(index, "jpg")}`;
 
 export const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
-// Base paths for the two sequences, surfaced for the debug overlay.
+// Base paths for the sequences, surfaced for the debug overlay.
 export const COCKPIT_DESKTOP_SEQUENCE_PATH = "/cockpit-sequence";
+export const COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH = "/cockpit-mobile-portrait";
 export const COCKPIT_MOBILE_SEQUENCE_PATH = "/cockpit-mobile";
 
 export type CockpitOverride = "mobile" | "desktop" | null;

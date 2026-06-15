@@ -56,6 +56,10 @@ coverage/
 # time via `npm run frames:mobile`. Source + script are committed; output is not.
 public/cockpit-mobile/
 
+# Generated portrait mobile frame set — regenerated from for_mobile_portrait/ at
+# build time via `npm run frames:mobile-portrait`. Source + script committed; output not.
+public/cockpit-mobile-portrait/
+
 # Legacy generated mobile set (superseded by cockpit-mobile), ignored if present.
 public/cockpit-sequence-mobile/
 
