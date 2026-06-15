@@ -4,19 +4,24 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useImagePreloader } from "../../hooks/useImagePreloader";
 import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { DevLoader } from "../ui/DevLoader";
 import {
   clamp,
+  COCKPIT_DESKTOP_SEQUENCE_PATH,
   COCKPIT_FRAME_COUNT,
   COCKPIT_MOBILE_FRAME_COUNT,
+  COCKPIT_MOBILE_SEQUENCE_PATH,
   getCockpitFrameSrc,
   getCockpitMobileFrameSrc,
+  readCockpitDebugEnabled,
+  readCockpitOverride,
 } from "../../lib/cinematicSequence";
 import { CockpitCanvasSequence } from "./CockpitCanvasSequence";
+import { CockpitDebugOverlay } from "./CockpitDebugOverlay";
 import { HeroOverlay } from "./HeroOverlay";
 
 // The cockpit swaps to the dedicated mobile sequence below 768px (per the
@@ -29,16 +34,31 @@ export function CockpitHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
   const isMobileViewport = useMobileViewport(COCKPIT_MOBILE_BREAKPOINT);
+  // A ?cockpitMobile=1 / ?cockpitDesktop=1 URL override forces the branch so the
+  // mobile vs desktop path can be confirmed on a real device; otherwise the
+  // viewport breakpoint decides. Read once — the query string is stable per load.
+  const override = useMemo(() => readCockpitOverride(), []);
+  const debugEnabled = useMemo(() => readCockpitDebugEnabled(), []);
+  const isMobile =
+    override === "mobile"
+      ? true
+      : override === "desktop"
+        ? false
+        : isMobileViewport;
+  const fitMode = isMobile ? "contain" : "cover";
+  const sequencePath = isMobile
+    ? COCKPIT_MOBILE_SEQUENCE_PATH
+    : COCKPIT_DESKTOP_SEQUENCE_PATH;
   const shouldUseStaticFallback = reducedMotion;
   // Mobile and desktop are independent sequences with their own frame counts;
   // both play full-length, mapped across the same scroll progress.
-  const frameCount = isMobileViewport
+  const frameCount = isMobile
     ? COCKPIT_MOBILE_FRAME_COUNT
     : COCKPIT_FRAME_COUNT;
   const sequenceStartFrame = 1;
   const sequenceEndFrame = frameCount;
   const frameStep = 2;
-  const getFrameSrc = isMobileViewport
+  const getFrameSrc = isMobile
     ? getCockpitMobileFrameSrc
     : getCockpitFrameSrc;
   // Scroll progress is written here every frame and read by the canvas rAF
@@ -59,7 +79,7 @@ export function CockpitHero() {
     frameCount,
     getFrameSrc,
     enabled: !shouldUseStaticFallback,
-    batchSize: isMobileViewport ? 2 : 4,
+    batchSize: isMobile ? 2 : 4,
     frameStep,
     startFrame: sequenceStartFrame,
     endFrame: sequenceEndFrame,
@@ -98,7 +118,17 @@ export function CockpitHero() {
           src={getCockpitMobileFrameSrc(MOBILE_STATIC_FRAME)}
           alt="Futuristic cockpit overlooking a cyber city"
         />
-        <HeroOverlay acquireOpacity={1} hideScrollCue minimal={isMobileViewport} />
+        <HeroOverlay acquireOpacity={1} hideScrollCue minimal={isMobile} />
+        {debugEnabled && (
+          <CockpitDebugOverlay
+            frameIndexRef={frameIndexRef}
+            getFrameSrc={getCockpitMobileFrameSrc}
+            isMobile={isMobile}
+            fitMode="contain"
+            sequencePath={COCKPIT_MOBILE_SEQUENCE_PATH}
+            override={override}
+          />
+        )}
       </section>
     );
   }
@@ -110,8 +140,8 @@ export function CockpitHero() {
           frameIndexRef={frameIndexRef}
           frameCount={frameCount}
           getNearestLoadedFrame={getNearestLoadedFrame}
-          maxDevicePixelRatio={isMobileViewport ? 1 : 1.5}
-          fitMode={isMobileViewport ? "contain" : "cover"}
+          maxDevicePixelRatio={isMobile ? 1 : 1.5}
+          fitMode={fitMode}
         />
         <motion.div
           className="canvas-loader"
@@ -124,9 +154,19 @@ export function CockpitHero() {
         <HeroOverlay
           acquireOpacity={acquireOpacity}
           cueOpacity={cueOpacity}
-          hideScrollCue={isMobileViewport || hasEntered}
-          minimal={isMobileViewport}
+          hideScrollCue={isMobile || hasEntered}
+          minimal={isMobile}
         />
+        {debugEnabled && (
+          <CockpitDebugOverlay
+            frameIndexRef={frameIndexRef}
+            getFrameSrc={getFrameSrc}
+            isMobile={isMobile}
+            fitMode={fitMode}
+            sequencePath={sequencePath}
+            override={override}
+          />
+        )}
       </motion.div>
     </section>
   );

@@ -16,3 +16,47 @@ export const getCockpitMobileFrameSrc = (index: number) =>
 
 export const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
+
+// Base paths for the two sequences, surfaced for the debug overlay.
+export const COCKPIT_DESKTOP_SEQUENCE_PATH = "/cockpit-sequence";
+export const COCKPIT_MOBILE_SEQUENCE_PATH = "/cockpit-mobile";
+
+export type CockpitOverride = "mobile" | "desktop" | null;
+
+// Runtime override read from the URL, so the mobile/desktop branch can be forced
+// on a real device against the deployed build:
+//   ?cockpitMobile=1  -> force the mobile sequence + contain fit
+//   ?cockpitDesktop=1 -> force the desktop sequence + cover fit
+export function readCockpitOverride(search?: string): CockpitOverride {
+  if (typeof window === "undefined" && search === undefined) {
+    return null;
+  }
+
+  const params = new URLSearchParams(search ?? window.location.search);
+
+  if (params.get("cockpitMobile") === "1") {
+    return "mobile";
+  }
+
+  if (params.get("cockpitDesktop") === "1") {
+    return "desktop";
+  }
+
+  return null;
+}
+
+// The debug overlay is on by default in dev. In a production build it stays
+// hidden for normal visitors but can be switched on with ?cockpitDebug=1 so the
+// same diagnostics are available on a real phone against the deployed site.
+export function readCockpitDebugEnabled(search?: string): boolean {
+  if (import.meta.env.DEV) {
+    return true;
+  }
+
+  if (typeof window === "undefined" && search === undefined) {
+    return false;
+  }
+
+  const params = new URLSearchParams(search ?? window.location.search);
+  return params.get("cockpitDebug") === "1";
+}
