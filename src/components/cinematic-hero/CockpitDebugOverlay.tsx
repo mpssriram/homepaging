@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { MutableRefObject } from "react";
+import type { LoadedFrame } from "../../hooks/useImagePreloader";
 import type { CockpitOverride } from "../../lib/cinematicSequence";
 
 type FitMode = "cover" | "contain";
@@ -11,6 +12,10 @@ type CockpitDebugOverlayProps = {
   fitMode: FitMode;
   sequencePath: string;
   override: CockpitOverride;
+  // Optional: when present, the overlay reports the natural pixel size of the
+  // frame currently on the canvas so a portrait set (e.g. 720x1280 / 1080x1920)
+  // can be verified against a landscape one (~853x480) on a real device.
+  getNearestLoadedFrame?: (targetFrame: number) => LoadedFrame | null;
 };
 
 // Dev-only (or ?cockpitDebug=1) diagnostics for the cockpit hero. It ticks a few
@@ -23,6 +28,7 @@ export function CockpitDebugOverlay({
   fitMode,
   sequencePath,
   override,
+  getNearestLoadedFrame,
 }: CockpitDebugOverlayProps) {
   const [, setTick] = useState(0);
 
@@ -40,6 +46,10 @@ export function CockpitDebugOverlay({
   }, []);
 
   const frame = Math.round(frameIndexRef.current);
+  const loadedImage = getNearestLoadedFrame?.(frame)?.image;
+  const naturalSize = loadedImage
+    ? `${loadedImage.naturalWidth}x${loadedImage.naturalHeight}`
+    : "—";
   const rows: Array<[string, string]> = [
     ["window.innerWidth", `${window.innerWidth}px`],
     ["window.innerHeight", `${window.innerHeight}px`],
@@ -47,6 +57,7 @@ export function CockpitDebugOverlay({
     ["isMobile", String(isMobile)],
     ["sequence", sequencePath],
     ["frame src", getFrameSrc(frame)],
+    ["image natural size", naturalSize],
     ["fitMode", fitMode],
     ["override", override ?? "none"],
   ];

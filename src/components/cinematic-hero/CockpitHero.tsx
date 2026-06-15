@@ -13,10 +13,12 @@ import {
   clamp,
   COCKPIT_DESKTOP_SEQUENCE_PATH,
   COCKPIT_FRAME_COUNT,
-  COCKPIT_MOBILE_FRAME_COUNT,
+  COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT,
+  COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH,
   COCKPIT_MOBILE_SEQUENCE_PATH,
   getCockpitFrameSrc,
   getCockpitMobileFrameSrc,
+  getCockpitMobilePortraitFrameSrc,
   readCockpitDebugEnabled,
   readCockpitOverride,
 } from "../../lib/cinematicSequence";
@@ -45,21 +47,23 @@ export function CockpitHero() {
       : override === "desktop"
         ? false
         : isMobileViewport;
-  const fitMode = isMobile ? "contain" : "cover";
+  // The portrait frames are already vertical, so the phone fills with "cover"
+  // (no blurred bands, no landscape-clip look). Desktop stays "cover" too.
+  const fitMode = "cover";
   const sequencePath = isMobile
-    ? COCKPIT_MOBILE_SEQUENCE_PATH
+    ? COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH
     : COCKPIT_DESKTOP_SEQUENCE_PATH;
   const shouldUseStaticFallback = reducedMotion;
   // Mobile and desktop are independent sequences with their own frame counts;
   // both play full-length, mapped across the same scroll progress.
   const frameCount = isMobile
-    ? COCKPIT_MOBILE_FRAME_COUNT
+    ? COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT
     : COCKPIT_FRAME_COUNT;
   const sequenceStartFrame = 1;
   const sequenceEndFrame = frameCount;
   const frameStep = 2;
   const getFrameSrc = isMobile
-    ? getCockpitMobileFrameSrc
+    ? getCockpitMobilePortraitFrameSrc
     : getCockpitFrameSrc;
   // Scroll progress is written here every frame and read by the canvas rAF
   // loop, so the cockpit sequence never drives a React re-render.
@@ -165,6 +169,7 @@ export function CockpitHero() {
             fitMode={fitMode}
             sequencePath={sequencePath}
             override={override}
+            getNearestLoadedFrame={getNearestLoadedFrame}
           />
         )}
       </motion.div>
