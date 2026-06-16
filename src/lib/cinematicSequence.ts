@@ -4,7 +4,11 @@ export const COCKPIT_FRAME_COUNT = 240;
 // /cockpit-mobile-portrait, prepared by scripts/prepare-mobile-portrait-frames.mjs.
 // This is the default mobile experience: the frames are already portrait, so they
 // fill a phone screen with "cover" and never read like a landscape clip.
-export const COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT = 120;
+//
+// 120 portrait approach frames + 60 arrival-ending frames cropped from the desktop
+// set (frames 0121..0180) so the phone gets the same "cabin settle + DEV CELL CLUB
+// transmission" payoff as desktop. Keep in sync with prepare-mobile-portrait-frames.mjs.
+export const COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT = 180;
 
 // Legacy landscape mobile sequence (AUTOx480, ~853x480 16:9) served from
 // /cockpit-mobile, prepared by scripts/prepare-mobile-frames.mjs. Retained as a
