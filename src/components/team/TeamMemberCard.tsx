@@ -42,7 +42,7 @@ export function TeamMemberCard({ member }: TeamMemberCardProps) {
       <div className="team-member-card__header">
         <div className="team-member-card__avatar" aria-hidden="true">
           {member.avatar ? (
-            <img alt="" src={member.avatar} />
+            <img alt="" loading="lazy" src={member.avatar} />
           ) : (
             <span>{initials || "DC"}</span>
           )}

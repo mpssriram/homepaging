@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 import * as THREE from "three";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { sessionStatus } from "../../pages/homeData";
 import { initDroneGyro } from "./droneGyro";
 import type { DroneGyroController } from "./droneGyro";
 import "./HomeDroneHero.css";
@@ -504,17 +505,19 @@ export function HomeDroneHero() {
       <div className="home-drone-hero__status" aria-label="Dev Cell status">
         <span>
           <i className="home-drone-hero__dot" />
-          <b>Open Lab</b> / Friday 18:00 / Lab Block
+          <b>{sessionStatus.openLab.label}</b> / {sessionStatus.openLab.schedule} /{" "}
+          {sessionStatus.openLab.location}
         </span>
         <span>
           <i className="home-drone-hero__dot home-drone-hero__dot--pink" />
-          <b>Build Night</b> / Tue 19:00 / Dev Cell Room
+          <b>{sessionStatus.buildNight.label}</b> /{" "}
+          {sessionStatus.buildNight.schedule} / {sessionStatus.buildNight.location}
         </span>
         <span>
-          <b>Crew</b> / 14 Active
+          <b>{sessionStatus.crew.label}</b> / {sessionStatus.crew.value}
         </span>
         <span>
-          <b>Builds</b> / 6 Live
+          <b>{sessionStatus.builds.label}</b> / {sessionStatus.builds.value}
         </span>
       </div>
     </motion.section>

@@ -1,3 +1,21 @@
+// Single source of truth for "what's happening next" — read by the Navbar
+// info strip (visible on first paint, every page) and the homepage status
+// bar, so updating a session only means editing it here.
+export const sessionStatus = {
+  openLab: {
+    label: "Open Lab",
+    schedule: "Friday 18:00",
+    location: "Lab Block",
+  },
+  buildNight: {
+    label: "Build Night",
+    schedule: "Tue 19:00",
+    location: "Dev Cell Room",
+  },
+  crew: { label: "Crew", value: "14 Active" },
+  builds: { label: "Builds", value: "6 Live" },
+};
+
 export const homeSpecs = [
   {
     label: "Home base",

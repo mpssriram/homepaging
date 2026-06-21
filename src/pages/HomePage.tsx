@@ -9,9 +9,12 @@ import {
 } from "react";
 import { CockpitHero } from "../components/cinematic-hero/CockpitHero";
 import { Magnet } from "../components/ui/Magnet";
+import { Reveal } from "../components/ui/Reveal";
 import { ShinyText } from "../components/ui/ShinyText";
+import { useParallax } from "../hooks/useParallax";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { homePrograms, homeSpecs, waysIn, workPreview } from "./homeData";
+import { shippedProjects } from "./shippedProjects";
 
 const HomeDroneHero = lazy(
   () => import("../components/cinematic-hero/HomeDroneHero"),
@@ -56,34 +59,6 @@ function DeferredHomeDroneHero() {
   );
 }
 
-function RevealBlock({
-  children,
-  className,
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const reducedMotion = useReducedMotion();
-
-  if (reducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 28 }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      viewport={{ once: true, amount: 0.18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function SectionIntro({
   eyebrow,
   title,
@@ -96,7 +71,7 @@ function SectionIntro({
   id?: string;
 }) {
   return (
-    <RevealBlock>
+    <Reveal>
       <p className="eyebrow text-accent-pink">{eyebrow}</p>
       <div className="section-heading">
         <h2 className="type-display" id={id}>
@@ -104,22 +79,26 @@ function SectionIntro({
         </h2>
         {text ? <p className="type-body max-w-[31rem]">{text}</p> : null}
       </div>
-    </RevealBlock>
+    </Reveal>
   );
 }
 
 function AboutSection() {
+  const { ref: aboutRef, y: headingY } = useParallax(20);
+
   return (
-    <section className="content-section" id="about">
+    <motion.section className="content-section" id="about" ref={aboutRef}>
       <div className="intro-grid">
-        <RevealBlock>
-          <p className="eyebrow text-accent-pink">What we are</p>
-          <h2 className="type-display mt-5">
-            A small room of students who{" "}
-            <span className="text-accent-cyan">build.</span>
-          </h2>
-        </RevealBlock>
-        <RevealBlock className="pt-2 md:pt-8" delay={0.08}>
+        <motion.div style={{ y: headingY }}>
+          <Reveal>
+            <p className="eyebrow text-accent-pink">What we are</p>
+            <h2 className="type-display mt-5">
+              A small room of students who{" "}
+              <span className="text-accent-cyan">build.</span>
+            </h2>
+          </Reveal>
+        </motion.div>
+        <Reveal className="pt-2 md:pt-8" delay={0.08}>
           <p className="type-lead">
             Dev Cell is not a lecture series. It is a working club: build
             nights, code reviews, shared repos, and the kind of feedback that
@@ -143,9 +122,9 @@ function AboutSection() {
               </div>
             ))}
           </div>
-        </RevealBlock>
+        </Reveal>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
@@ -171,7 +150,7 @@ function ProgramsSection() {
 
       <div className="mt-[3rem] grid gap-4 md:grid-cols-3">
         {homePrograms.map((program, index) => (
-          <RevealBlock delay={index * 0.08} key={program.number}>
+          <Reveal delay={index * 0.08} key={program.number}>
             <motion.article
               className="card-standard h-full min-h-[18rem] p-6"
               whileHover={
@@ -204,7 +183,7 @@ function ProgramsSection() {
                 <span>How it runs</span>
               </a>
             </motion.article>
-          </RevealBlock>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -212,9 +191,11 @@ function ProgramsSection() {
 }
 
 function WorkPreview() {
+  const hasShippedProjects = shippedProjects.length > 0;
+
   return (
     <section aria-labelledby="work-heading" className="content-section pt-0">
-      <RevealBlock>
+      <Reveal>
         <div className="flex flex-col gap-5 border-b border-[rgba(139,234,255,0.16)] pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow text-accent-pink">Projects</p>
@@ -222,18 +203,51 @@ function WorkPreview() {
               className="mt-4 font-display text-[clamp(2.1rem,5.8vw,4.4rem)] font-bold uppercase leading-[0.94] tracking-[-0.045em]"
               id="work-heading"
             >
-              {workPreview.title}
+              {hasShippedProjects ? "Shipped by students." : workPreview.title}
             </h2>
           </div>
           <a className="text-link" href="/projects">
             See projects <span aria-hidden="true">-&gt;</span>
           </a>
         </div>
-      </RevealBlock>
+      </Reveal>
 
-      <RevealBlock>
-        <p className="type-body mt-6 max-w-[42rem]">{workPreview.description}</p>
-      </RevealBlock>
+      {hasShippedProjects ? (
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {shippedProjects.map((project, index) => (
+            <Reveal delay={index * 0.06} key={project.title}>
+              <a
+                className="card-standard group flex h-full min-h-[14rem] flex-col p-6"
+                href={project.link}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {project.stack ? (
+                  <span className="type-label text-accent-cyan-soft">
+                    {project.stack}
+                  </span>
+                ) : null}
+                <h3 className="mt-4 font-display text-[1.5rem] font-semibold uppercase leading-tight">
+                  {project.title}
+                </h3>
+                <p className="type-body mt-3 flex-1">{project.description}</p>
+                {project.builders ? (
+                  <p className="type-label mt-4 text-text-muted">
+                    {project.builders}
+                  </p>
+                ) : null}
+                <span className="text-link mt-4 text-accent-cyan group-hover:text-white">
+                  View <span aria-hidden="true">-&gt;</span>
+                </span>
+              </a>
+            </Reveal>
+          ))}
+        </div>
+      ) : (
+        <Reveal>
+          <p className="type-body mt-6 max-w-[42rem]">{workPreview.description}</p>
+        </Reveal>
+      )}
     </section>
   );
 }
@@ -247,7 +261,7 @@ function WaysInSection() {
 
       <div className="mt-8 border-t border-[rgba(139,234,255,0.16)]">
         {waysIn.map((way, index) => (
-          <RevealBlock delay={index * 0.045} key={way.number}>
+          <Reveal delay={index * 0.045} key={way.number}>
             <motion.a
               className="group grid gap-4 border-b border-[rgba(139,234,255,0.12)] py-6 transition-colors duration-200 hover:bg-[rgba(139,234,255,0.035)] sm:grid-cols-[4rem_1fr_auto] sm:items-center sm:px-2"
               href={way.href}
@@ -272,7 +286,7 @@ function WaysInSection() {
                 {way.cta} <span aria-hidden="true">-&gt;</span>
               </span>
             </motion.a>
-          </RevealBlock>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -281,17 +295,20 @@ function WaysInSection() {
 
 function JoinSection() {
   const reducedMotion = useReducedMotion();
+  const { ref: joinRef, y: glowY } = useParallax(28);
 
   return (
-    <section
+    <motion.section
       className="content-section relative overflow-hidden pb-[10rem] pt-[5rem] text-center"
       id="join"
+      ref={joinRef}
     >
-      <div
+      <motion.div
         aria-hidden="true"
         className="absolute inset-0 -z-[1] bg-[radial-gradient(ellipse_50rem_24rem_at_50%_58%,rgba(255,59,107,0.13),transparent_65%)]"
+        style={{ y: glowY }}
       />
-      <RevealBlock className="visual-center-offset mx-auto flex max-w-[48rem] flex-col items-center">
+      <Reveal className="visual-center-offset mx-auto flex max-w-[48rem] flex-col items-center">
         <motion.span
           animate={
             reducedMotion
@@ -331,8 +348,8 @@ function JoinSection() {
             Read the manifesto first
           </a>
         </div>
-      </RevealBlock>
-    </section>
+      </Reveal>
+    </motion.section>
   );
 }
 

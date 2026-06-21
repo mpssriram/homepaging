@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
 import { Navbar } from "../components/cinematic-hero/Navbar";
 import { CommandBand } from "../components/ui/CommandBand";
 import { Dev3DCard } from "../components/ui/Dev3DCard";
 import { GlowCard } from "../components/ui/GlowCard";
+import { Reveal } from "../components/ui/Reveal";
 import { SignalAside } from "../components/ui/SignalAside";
-import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useParallaxPair } from "../hooks/useParallax";
 
 type CardItem = {
   title: string;
@@ -65,11 +65,6 @@ const communitySignals = [
   { label: "Support Layer", value: "Mentor Active", text: "Seniors and peers help when you get stuck." },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0 },
-};
-
 function SectionHeader({
   eyebrow,
   title,
@@ -90,26 +85,18 @@ function SectionHeader({
   );
 }
 
-function AnimatedBlock({ children, className }: { children: ReactNode; className?: string }) {
-  const reducedMotion = useReducedMotion();
-  if (reducedMotion) return <div className={className}>{children}</div>;
-  return (
-    <motion.div className={className} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.22 }} variants={fadeUp} transition={{ duration: 0.55, ease: "easeOut" }}>
-      {children}
-    </motion.div>
-  );
-}
-
 export function CommunityPage() {
+  const { ref: heroRef, yA: gridY, yB: frameY } = useParallaxPair(18, 36);
+
   return (
     <main className="site-page site-page--community relative min-h-screen overflow-x-clip overflow-y-visible" id="top">
       <div className="relative z-1">
         <Navbar />
 
-        <section className="relative grid min-h-[42rem] p-[9rem_1.5rem_5rem] place-items-center overflow-hidden border-b border-[rgba(255,59,107,0.12)]" aria-labelledby="community-title">
-          <div className="absolute inset-[5rem_1rem_1rem] pointer-events-none border-x border-[rgba(255,59,107,0.16)] bg-[linear-gradient(90deg,rgba(255,59,107,0.12),transparent_8rem,transparent_calc(100%-8rem),rgba(255,59,107,0.12)),linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[auto,100%_4rem] opacity-55" aria-hidden="true" />
-          <div className="absolute inset-[6.75rem_max(1.5rem,calc((100%-76rem)/2))_2.25rem] pointer-events-none border border-[rgba(255,59,107,0.18)] shadow-[inset_0_0_3rem_rgba(119,231,255,0.05),0_0_4rem_rgba(119,231,255,0.06)] before:absolute before:top-[-1px] before:left-8 before:w-[7rem] before:h-[1px] before:bg-accent-red before:shadow-[0_0_1.25rem_rgba(255,99,124,0.75)] after:absolute after:top-[-1px] after:right-8 after:w-[7rem] after:h-[1px] after:bg-accent-red after:shadow-[0_0_1.25rem_rgba(255,99,124,0.75)]" aria-hidden="true" />
-          <AnimatedBlock className="w-[min(calc(100vw-3rem),72rem)] min-w-0 py-4">
+        <motion.section className="relative grid min-h-[42rem] p-[9rem_1.5rem_5rem] place-items-center overflow-hidden border-b border-[rgba(255,59,107,0.12)]" aria-labelledby="community-title" ref={heroRef}>
+          <motion.div className="absolute inset-[5rem_1rem_1rem] pointer-events-none border-x border-[rgba(255,59,107,0.16)] bg-[linear-gradient(90deg,rgba(255,59,107,0.12),transparent_8rem,transparent_calc(100%-8rem),rgba(255,59,107,0.12)),linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[auto,100%_4rem] opacity-55" aria-hidden="true" style={{ y: gridY }} />
+          <motion.div className="absolute inset-[6.75rem_max(1.5rem,calc((100%-76rem)/2))_2.25rem] pointer-events-none border border-[rgba(255,59,107,0.18)] shadow-[inset_0_0_3rem_rgba(119,231,255,0.05),0_0_4rem_rgba(119,231,255,0.06)] before:absolute before:top-[-1px] before:left-8 before:w-[7rem] before:h-[1px] before:bg-accent-red before:shadow-[0_0_1.25rem_rgba(255,99,124,0.75)] after:absolute after:top-[-1px] after:right-8 after:w-[7rem] after:h-[1px] after:bg-accent-red after:shadow-[0_0_1.25rem_rgba(255,99,124,0.75)]" aria-hidden="true" style={{ y: frameY }} />
+          <Reveal className="w-[min(calc(100vw-3rem),72rem)] min-w-0 py-4">
             <p className="eyebrow">Community Channel / Dev Cell</p>
             <h1 id="community-title" className="max-w-[58rem] mt-[1.2rem] font-display text-[clamp(4rem,11vw,8.8rem)] font-bold tracking-[-0.055em] leading-[0.84] uppercase text-[#f8fcff] [text-shadow:0_0_2rem_rgba(119,231,255,0.16)]">
               <span className="block">A home for</span>
@@ -127,18 +114,18 @@ export function CommunityPage() {
                 Meet Core Crew
               </a>
             </div>
-          </AnimatedBlock>
+          </Reveal>
           <div className="absolute right-[max(1.5rem,calc((100%-76rem)/2))] bottom-[2.8rem] grid gap-[0.45rem] text-[rgba(194,240,255,0.56)] text-[0.56rem] tracking-[0.22em] text-right uppercase" aria-hidden="true">
             <span className="block">BEGINNER FRIENDLY</span>
             <span className="block">BUILD NIGHTS ONLINE</span>
             <span className="block">MENTOR SIGNAL ACTIVE</span>
           </div>
-        </section>
+        </motion.section>
 
         <section className="content-section pt-[2.4rem] pb-[1.2rem]">
-          <AnimatedBlock>
+          <Reveal>
             <CommandBand items={communitySignals} variant="community" />
-          </AnimatedBlock>
+          </Reveal>
         </section>
 
         <section className="content-section pt-[5.5rem] pb-[4rem]" id="community-value">
@@ -148,9 +135,9 @@ export function CommunityPage() {
           </div>
           <div className="grid gap-[1.2rem] mt-[2.8rem] sm:grid-cols-2 lg:grid-cols-4">
             {valueCards.map((card) => (
-              <AnimatedBlock key={card.title}>
+              <Reveal key={card.title}>
                 <Dev3DCard title={card.title} description={card.text} ctaLabel="Explore" badgeTop={card.badgeTop} badgeMain={card.badgeMain} variant={card.variant} />
-              </AnimatedBlock>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -159,7 +146,7 @@ export function CommunityPage() {
           <SectionHeader eyebrow="Start Here" title="Your first three moves." text="No long onboarding. Just show up, pick something small, and build with feedback." />
           <div className="grid gap-4 mt-[2.8rem] lg:grid-cols-3">
             {startSteps.map((item) => (
-              <AnimatedBlock key={item.step}>
+              <Reveal key={item.step}>
                 <GlowCard className="h-full rounded-[1.1rem]">
                   <div className="h-full min-h-[14rem] p-[1.45rem] border border-[rgba(255,59,107,0.14)] bg-[rgba(5,11,16,0.74)] backdrop-blur-[12px] min-w-0 rounded-[1.1rem] transition-[transform,border-color,box-shadow] duration-180 ease-out hover:-translate-y-[0.18rem] hover:border-[rgba(255,59,107,0.3)] hover:shadow-[0_1.5rem_2.8rem_rgba(2,6,23,0.26)]">
                     <span className="text-accent-red text-[0.62rem] tracking-[0.22em] uppercase">{item.step}</span>
@@ -167,13 +154,13 @@ export function CommunityPage() {
                     <p className="text-text-dim text-[0.84rem] leading-[1.85] mt-[0.45rem]">{item.text}</p>
                   </div>
                 </GlowCard>
-              </AnimatedBlock>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section className="content-section pt-[4rem] pb-[8rem]" id="community-join" aria-labelledby="community-cta-title">
-          <AnimatedBlock className="visual-center-offset mx-auto flex max-w-[60rem] flex-col items-center border border-[rgba(255,59,107,0.16)] bg-[linear-gradient(135deg,rgba(12,36,49,0.7),rgba(5,10,15,0.78))] shadow-[0_1.5rem_4rem_rgba(0,0,0,0.28)] backdrop-blur-[16px] p-[clamp(1.4rem,5vw,3.4rem)] text-center min-w-0">
+          <Reveal className="visual-center-offset mx-auto flex max-w-[60rem] flex-col items-center border border-[rgba(255,59,107,0.16)] bg-[linear-gradient(135deg,rgba(12,36,49,0.7),rgba(5,10,15,0.78))] shadow-[0_1.5rem_4rem_rgba(0,0,0,0.28)] backdrop-blur-[16px] p-[clamp(1.4rem,5vw,3.4rem)] text-center min-w-0">
             <SectionHeader eyebrow="Access Point / Join" title="Ready to build with Dev Cell?" text="Join the community, attend a session, or meet the people running projects and workshops." centered />
             <div className="mt-[0.4rem] flex w-full flex-wrap justify-center gap-[0.85rem]">
               <a className="inline-flex items-center justify-center mt-8 px-[1.3rem] py-4 border border-[rgba(255,59,107,0.38)] text-[#c5f8ff] text-[0.68rem] tracking-[0.16em] uppercase bg-[linear-gradient(180deg,rgba(255,59,107,0.18),rgba(255,99,124,0.06))] shadow-[inset_0_0_1.4rem_rgba(255,59,107,0.08)] transition-[color,background,border-color,box-shadow] duration-180 ease-out hover:text-[#fff5f7] hover:bg-[linear-gradient(135deg,#ff3b6b,#ff637c)] focus-visible:text-[#fff5f7] focus-visible:bg-[linear-gradient(135deg,#ff3b6b,#ff637c)]" href="mailto:hello@devcell.club">
@@ -186,7 +173,7 @@ export function CommunityPage() {
                 Open Event Board
               </a>
             </div>
-          </AnimatedBlock>
+          </Reveal>
         </section>
 
         <footer className="flex items-center justify-between w-[min(calc(100%-3rem),72rem)] mx-auto py-8 text-text-muted text-[0.58rem] tracking-[0.18em] uppercase">

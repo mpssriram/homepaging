@@ -31,6 +31,20 @@ import { HeroOverlay } from "./HeroOverlay";
 const COCKPIT_MOBILE_BREAKPOINT = 768;
 // A representative mid-sequence frame for the reduced-motion still.
 const MOBILE_STATIC_FRAME = 60;
+// Returning visitors already have the frames cached by the browser, so the
+// loader doesn't need to block them a second time.
+const INTRO_SEEN_KEY = "dc-intro-seen";
+// Hard ceiling so a failed first-frame request (no onerror retry) can't leave
+// the loader on screen forever.
+const INTRO_TIMEOUT_MS = 3000;
+
+function readIntroSeen() {
+  try {
+    return window.localStorage.getItem(INTRO_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 export function CockpitHero() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -69,6 +83,7 @@ export function CockpitHero() {
   // loop, so the cockpit sequence never drives a React re-render.
   const frameIndexRef = useRef(sequenceStartFrame);
   const [hasEntered, setHasEntered] = useState(false);
+  const [hasSeenIntro, setHasSeenIntro] = useState(readIntroSeen);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
@@ -113,6 +128,33 @@ export function CockpitHero() {
     frameIndexRef.current = sequenceStartFrame;
   }, [sequenceStartFrame]);
 
+  useEffect(() => {
+    if (!isInitialFrameReady || hasSeenIntro) {
+      return;
+    }
+
+    setHasSeenIntro(true);
+
+    try {
+      window.localStorage.setItem(INTRO_SEEN_KEY, "1");
+    } catch {
+      // Privacy mode or storage disabled — the loader still resolves via
+      // isInitialFrameReady itself, it just won't skip next visit.
+    }
+  }, [hasSeenIntro, isInitialFrameReady]);
+
+  useEffect(() => {
+    if (hasSeenIntro) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setHasSeenIntro(true);
+    }, INTRO_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [hasSeenIntro]);
+
   if (shouldUseStaticFallback) {
     return (
       <section className="static-hero" id="top" ref={sectionRef}>
@@ -149,8 +191,8 @@ export function CockpitHero() {
         />
         <motion.div
           className="canvas-loader"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isInitialFrameReady ? 0 : 1 }}
+          initial={{ opacity: hasSeenIntro ? 0 : 1 }}
+          animate={{ opacity: isInitialFrameReady || hasSeenIntro ? 0 : 1 }}
           transition={{ duration: 0.35 }}
         >
           <DevLoader label="Loading cockpit sequence..." />

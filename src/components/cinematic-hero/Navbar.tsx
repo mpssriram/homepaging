@@ -6,6 +6,7 @@ import {
 import { useState } from "react";
 import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { sessionStatus } from "../../pages/homeData";
 import { DecryptedText } from "../ui/DecryptedText";
 
 export function Navbar() {
@@ -65,6 +66,13 @@ export function Navbar() {
         ease: [0.16, 1, 0.3, 1],
       }}
     >
+      <div className="mx-auto mt-2 flex w-[min(calc(100%-2.5rem),82rem)] items-center justify-center gap-2 truncate px-2 text-center text-[0.58rem] tracking-[0.16em] text-[rgba(226,243,250,0.62)]">
+        <span className="h-[0.3rem] w-[0.3rem] shrink-0 rounded-full bg-accent-red" />
+        <span className="truncate">
+          {sessionStatus.buildNight.label} / {sessionStatus.buildNight.schedule}{" "}
+          / {sessionStatus.buildNight.location}
+        </span>
+      </div>
       <motion.nav
         animate={{
           backgroundColor: hasScrolled

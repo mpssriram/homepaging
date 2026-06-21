@@ -193,7 +193,7 @@
 .home-drone-hero__unit-callout {
   position: absolute;
   top: 22%;
-  right: 1.5%;
+  right: clamp(1.25rem, 4vw, 4rem);
   display: grid;
   gap: 0.25rem;
   color: #8beaff;
@@ -208,8 +208,8 @@
 .home-drone-hero__unit-callout::after {
   position: absolute;
   top: 50%;
-  right: -2.4rem;
-  width: 1.6rem;
+  right: -1.2rem;
+  width: 0.8rem;
   height: 1px;
   content: "";
   background: #8beaff;
@@ -223,9 +223,9 @@
 
 .home-drone-hero__unit-callout--secondary {
   top: auto;
-  right: 1.5%;
+  right: clamp(1.25rem, 4vw, 4rem);
   bottom: 18%;
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
 .home-drone-hero__status {
@@ -311,11 +311,12 @@
 
 .home-drone-hero__coords {
   position: absolute;
-  color: rgba(194, 240, 255, 0.52);
+  color: rgba(194, 240, 255, 0.78);
   font-family: var(--font-mono);
   font-size: 0.55rem;
   letter-spacing: 0.16em;
   line-height: 1.3;
+  text-shadow: 0 0 0.6rem rgba(139, 234, 255, 0.22);
   text-transform: uppercase;
 }
 

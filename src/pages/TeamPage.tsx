@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
 import { Navbar } from "../components/cinematic-hero/Navbar";
 import { TeamMemberCarousel } from "../components/team/TeamMemberCarousel";
 import { GlowCard } from "../components/ui/GlowCard";
+import { Reveal } from "../components/ui/Reveal";
 import { TiltedCard } from "../components/ui/TiltedCard";
 import type { TeamMember } from "../components/team/TeamMemberCard";
-import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useParallaxPair } from "../hooks/useParallax";
 
 type ContributorGroup = {
   label: string;
@@ -116,38 +116,6 @@ const openRoles: OpenRole[] = [
   },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0 },
-};
-
-function AnimatedBlock({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  const reducedMotion = useReducedMotion();
-
-  if (reducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.2 }}
-      variants={fadeUp}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 function SectionHeader({
   eyebrow,
   title,
@@ -179,24 +147,29 @@ function SectionHeader({
 }
 
 export function TeamPage() {
+  const { ref: heroRef, yA: gridY, yB: frameY } = useParallaxPair(18, 36);
+
   return (
     <main className="site-page site-page--team relative min-h-screen overflow-x-clip overflow-y-visible" id="top">
       <div className="relative z-[1]">
         <Navbar />
 
-        <section
+        <motion.section
           className="relative grid min-h-[38rem] p-[8.5rem_1.5rem_4.5rem] place-items-center overflow-hidden border-b border-[rgba(119,231,255,0.16)]"
           aria-labelledby="team-page-title"
+          ref={heroRef}
         >
-          <div
+          <motion.div
             className="absolute inset-[5rem_1rem_1rem] pointer-events-none border-x border-[rgba(119,231,255,0.15)] bg-[linear-gradient(90deg,rgba(34,211,238,0.1),transparent_7rem,transparent_calc(100%-7rem),rgba(255,59,107,0.08)),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[auto,100%_4rem]"
             aria-hidden="true"
+            style={{ y: gridY }}
           />
-          <div
+          <motion.div
             className="absolute inset-[6.5rem_max(1.5rem,calc((100%-74rem)/2))_2rem] pointer-events-none border border-[rgba(139,234,255,0.18)] shadow-[inset_0_0_2rem_rgba(34,211,238,0.08),0_0_3rem_rgba(2,6,23,0.2)] before:absolute before:top-[-1px] before:left-8 before:w-[6rem] before:h-[1px] before:bg-[#8beaff] before:shadow-[0_0_1rem_rgba(139,234,255,0.58)] after:absolute after:top-[-1px] after:right-8 after:w-[6rem] after:h-[1px] after:bg-[#8beaff] after:shadow-[0_0_1rem_rgba(139,234,255,0.58)]"
             aria-hidden="true"
+            style={{ y: frameY }}
           />
-          <AnimatedBlock className="w-[min(calc(100vw-3rem),72rem)] min-w-0">
+          <Reveal className="w-[min(calc(100vw-3rem),72rem)] min-w-0">
             <p className="eyebrow">Dev Cell Team</p>
             <h1
               id="team-page-title"
@@ -221,8 +194,8 @@ export function TeamPage() {
                 Enter Community
               </a>
             </div>
-          </AnimatedBlock>
-        </section>
+          </Reveal>
+        </motion.section>
 
         <section className="content-section pt-20 pb-20" id="core-team">
           <SectionHeader
@@ -230,9 +203,9 @@ export function TeamPage() {
             title="The crew"
             text="Students who keep Dev Cell moving through projects, events, sessions, reviews, and community support."
           />
-          <AnimatedBlock>
+          <Reveal>
             <TeamMemberCarousel ariaLabel="Core team member carousel" members={coreTeamMembers} />
-          </AnimatedBlock>
+          </Reveal>
         </section>
 
         <section className="content-section pt-20 pb-20" id="contributors">
@@ -243,7 +216,7 @@ export function TeamPage() {
           />
           <div className="grid grid-cols-1 gap-[1.2rem] mt-[2.8rem] md:grid-cols-2">
             {contributorGroups.map((group) => (
-              <AnimatedBlock key={group.label}>
+              <Reveal key={group.label}>
                 <GlowCard className="rounded-[1rem]">
                   <article className="border border-[rgba(139,234,255,0.18)] bg-[linear-gradient(155deg,rgba(8,30,46,0.78),rgba(6,15,25,0.92))] shadow-[inset_0_0_0_1px_rgba(224,242,254,0.04),0_1.2rem_2.6rem_rgba(2,6,23,0.24)] p-[1.2rem] min-w-0 transition-[transform,border-color,box-shadow] duration-180 ease-out hover:-translate-y-[0.16rem] hover:border-[rgba(139,234,255,0.36)] rounded-[1rem]">
                     <h3 className="text-[#f8fafc] font-display text-[1.6rem] tracking-[-0.03em]">
@@ -261,7 +234,7 @@ export function TeamPage() {
                     </div>
                   </article>
                 </GlowCard>
-              </AnimatedBlock>
+              </Reveal>
             ))}
           </div>
         </section>
@@ -274,7 +247,7 @@ export function TeamPage() {
           />
           <div className="grid grid-cols-1 gap-[1px] mt-[2.8rem] border border-[rgba(139,234,255,0.14)] bg-[rgba(139,234,255,0.14)] md:grid-cols-2 lg:grid-cols-4">
             {openRoles.map((role, index) => (
-              <AnimatedBlock key={role.title}>
+              <Reveal key={role.title}>
                 <TiltedCard className="h-full rounded-[0.9rem]">
                   <article className="min-h-[14rem] p-[1.1rem] bg-[rgba(6,15,25,0.88)] rounded-[0.9rem] transition-[transform,background] duration-180 ease-out hover:bg-[rgba(8,30,46,0.9)]">
                     <span className="text-[#8beaff] text-[0.58rem] tracking-[0.18em] uppercase">
@@ -288,13 +261,13 @@ export function TeamPage() {
                     </p>
                   </article>
                 </TiltedCard>
-              </AnimatedBlock>
+              </Reveal>
             ))}
           </div>
         </section>
 
         <section className="content-section pt-20 pb-20" id="join-team">
-          <AnimatedBlock className="visual-center-offset mx-auto flex max-w-[60rem] flex-col items-center border border-[rgba(139,234,255,0.2)] bg-[linear-gradient(155deg,rgba(8,30,46,0.82),rgba(6,15,25,0.92))] shadow-[inset_0_0_0_1px_rgba(224,242,254,0.04),0_1.2rem_2.6rem_rgba(2,6,23,0.24)] p-[clamp(1.4rem,4vw,3rem)] text-center min-w-0">
+          <Reveal className="visual-center-offset mx-auto flex max-w-[60rem] flex-col items-center border border-[rgba(139,234,255,0.2)] bg-[linear-gradient(155deg,rgba(8,30,46,0.82),rgba(6,15,25,0.92))] shadow-[inset_0_0_0_1px_rgba(224,242,254,0.04),0_1.2rem_2.6rem_rgba(2,6,23,0.24)] p-[clamp(1.4rem,4vw,3rem)] text-center min-w-0">
             <SectionHeader
               eyebrow="Join Path"
               title="From member to crew"
@@ -335,7 +308,7 @@ export function TeamPage() {
                 Help With Events
               </a>
             </div>
-          </AnimatedBlock>
+          </Reveal>
         </section>
 
         <footer className="flex flex-wrap justify-between gap-3 p-6 border-t border-[rgba(139,234,255,0.12)] text-[rgba(226,243,250,0.56)] text-[0.58rem] tracking-[0.18em] uppercase">

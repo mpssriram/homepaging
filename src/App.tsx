@@ -6,6 +6,7 @@ import { useReducedMotion } from "./hooks/useReducedMotion";
 import { CommunityPage } from "./pages/CommunityPage";
 import { EventsPage } from "./pages/EventsPage";
 import { HomePage } from "./pages/HomePage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { TeamPage } from "./pages/TeamPage";
 
@@ -117,7 +118,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    document.title = pageTitles[route.pathname] ?? "Dev Cell Club";
+    document.title =
+      pageTitles[route.pathname] ?? "Page not found | Dev Cell Club";
   }, [route.pathname]);
 
   useEffect(() => {
@@ -167,6 +169,8 @@ export function App() {
 
 function renderPage(pathname: string) {
   switch (pathname) {
+    case "/":
+      return <HomePage />;
     case "/about":
     case "/community":
       return <CommunityPage />;
@@ -177,7 +181,7 @@ function renderPage(pathname: string) {
     case "/projects":
       return <ProjectsPage />;
     default:
-      return <HomePage />;
+      return <NotFoundPage />;
   }
 }
 
