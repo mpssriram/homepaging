@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useImagePreloader } from "../../hooks/useImagePreloader";
 import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
-import { DevLoader } from "../ui/DevLoader";
+import { BootStatusPanel } from "../ui/LoadingSystem";
 import {
   clamp,
   COCKPIT_DESKTOP_SEQUENCE_PATH,
@@ -202,7 +202,10 @@ export function CockpitHero() {
           animate={{ opacity: isInitialFrameReady || hasSeenIntro ? 0 : 1 }}
           transition={{ duration: 0.35 }}
         >
-          <DevLoader label="Loading cockpit sequence..." />
+          <BootStatusPanel
+            compact={isMobile}
+            detail={isMobile ? "Loading mobile cockpit" : "Loading cockpit sequence"}
+          />
         </motion.div>
         <HeroOverlay
           acquireOpacity={acquireOpacity}

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SiteBackground, type SiteBackgroundVariant } from "./components/backgrounds/SiteBackground";
+import { RouteTransitionOverlay } from "./components/ui/LoadingSystem";
 import { ScrollProgress } from "./components/ui/ScrollProgress";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { CommunityPage } from "./pages/CommunityPage";
@@ -19,19 +20,46 @@ const pageTitles: Record<string, string> = {
   "/projects": "Projects | Dev Cell Club",
 };
 
-export function App() {
-  const reducedMotion = useReducedMotion();
-  const [route, setRoute] = useState(() => ({
+type RouteState = {
+  pathname: string;
+  hash: string;
+};
+
+type RouteTransitionState = {
+  id: number;
+  pathname: string;
+};
+
+function readRoute(): RouteState {
+  return {
     pathname: window.location.pathname.replace(/\/+$/, "") || "/",
     hash: window.location.hash,
-  }));
+  };
+}
+
+export function App() {
+  const reducedMotion = useReducedMotion();
+  const [route, setRoute] = useState(readRoute);
+  const [routeTransition, setRouteTransition] =
+    useState<RouteTransitionState | null>(null);
+  const currentPathnameRef = useRef(route.pathname);
+  const routeTransitionIdRef = useRef(0);
 
   useEffect(() => {
-    const syncRoute = () =>
-      setRoute({
-        pathname: window.location.pathname.replace(/\/+$/, "") || "/",
-        hash: window.location.hash,
-      });
+    const syncRoute = () => {
+      const nextRoute = readRoute();
+
+      if (currentPathnameRef.current !== nextRoute.pathname) {
+        currentPathnameRef.current = nextRoute.pathname;
+        routeTransitionIdRef.current += 1;
+        setRouteTransition({
+          id: routeTransitionIdRef.current,
+          pathname: nextRoute.pathname,
+        });
+      }
+
+      setRoute(nextRoute);
+    };
 
     const syncScrollbarCompensation = () => {
       const scrollbarWidth =
@@ -148,6 +176,7 @@ export function App() {
         variant={getBackgroundVariant(route.pathname)}
       />
       <ScrollProgress />
+      <RouteTransitionOverlay transition={routeTransition} />
       <AnimatePresence initial={false} mode="wait">
         <motion.div
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}

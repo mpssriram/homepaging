@@ -1,0 +1,527 @@
+.loader-mark {
+  --loader-mark-accent: var(--color-accent-cyan, #8beaff);
+  --loader-mark-glow: rgba(139, 234, 255, 0.52);
+  position: relative;
+  width: 7.5rem;
+  height: 5.625rem;
+  transform: scale(var(--loader-mark-scale, 1));
+  transform-origin: center;
+}
+
+.loader-mark--sm {
+  --loader-mark-scale: 0.78;
+}
+
+.loader-mark--md {
+  --loader-mark-scale: 0.92;
+}
+
+.loader-mark--lg {
+  --loader-mark-scale: 1.08;
+}
+
+.loader-mark--red {
+  --loader-mark-accent: var(--color-accent-red, #ff3b6b);
+  --loader-mark-glow: rgba(255, 59, 107, 0.46);
+}
+
+.loader-mark__orb {
+  position: absolute;
+  bottom: 1.875rem;
+  left: 3.125rem;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 36% 34%, rgba(255, 255, 255, 0.95), transparent 26%),
+    var(--loader-mark-accent);
+  box-shadow:
+    0 0 1.45rem var(--loader-mark-glow),
+    0 0 0.45rem rgba(255, 255, 255, 0.14) inset;
+  animation: loader-mark-bounce 0.52s ease-in-out infinite alternate;
+}
+
+.loader-mark__step {
+  position: absolute;
+  right: 0;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: rgba(224, 242, 254, 0.95);
+  box-shadow: 0 0 1.2rem rgba(224, 242, 254, 0.14);
+  animation: loader-mark-step 1s ease-in-out infinite;
+}
+
+.loader-mark__step--one {
+  top: 0;
+  width: 2.8125rem;
+}
+
+.loader-mark__step--two {
+  top: 1.25rem;
+  width: 2rem;
+  animation-delay: 0.05s;
+}
+
+.loader-mark__step--three {
+  top: 2.5rem;
+  width: 1.125rem;
+  animation-delay: 0.1s;
+}
+
+.loader-mark__step--four {
+  top: 3.75rem;
+  width: 2.375rem;
+  animation-delay: 0.15s;
+}
+
+.scan-line {
+  --scan-line-color: rgba(139, 234, 255, 0.72);
+  position: absolute;
+  pointer-events: none;
+}
+
+.scan-line--red {
+  --scan-line-color: rgba(255, 59, 107, 0.72);
+}
+
+.scan-line--horizontal {
+  inset: 0;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 46%,
+    var(--scan-line-color) 50%,
+    transparent 54%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.34;
+  animation: scan-line-y 2.7s ease-in-out infinite;
+}
+
+.scan-line--vertical {
+  inset-block: 0;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 46%,
+    var(--scan-line-color) 50%,
+    transparent 54%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.28;
+  animation: scan-line-x 2.4s ease-in-out infinite;
+}
+
+.hud-frame {
+  --hud-frame-accent: var(--color-accent-cyan, #8beaff);
+  --hud-frame-border: rgba(139, 234, 255, 0.24);
+  position: relative;
+  border: 1px solid var(--hud-frame-border);
+  background:
+    linear-gradient(180deg, rgba(224, 242, 254, 0.055), transparent 44%),
+    linear-gradient(145deg, rgba(7, 16, 24, 0.92), rgba(4, 8, 13, 0.94));
+  box-shadow:
+    0 1.5rem 3.25rem rgba(2, 6, 23, 0.42),
+    inset 0 0 0 1px rgba(224, 242, 254, 0.045);
+}
+
+.hud-frame--red {
+  --hud-frame-accent: var(--color-accent-red, #ff3b6b);
+  --hud-frame-border: rgba(255, 59, 107, 0.28);
+}
+
+.hud-frame__corner {
+  position: absolute;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-color: var(--hud-frame-accent);
+  opacity: 0.78;
+}
+
+.hud-frame__corner--tl {
+  top: -1px;
+  left: -1px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+
+.hud-frame__corner--tr {
+  top: -1px;
+  right: -1px;
+  border-top: 1px solid;
+  border-right: 1px solid;
+}
+
+.hud-frame__corner--bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 1px solid;
+  border-left: 1px solid;
+}
+
+.hud-frame__corner--br {
+  right: -1px;
+  bottom: -1px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.boot-status-panel {
+  position: relative;
+  display: grid;
+  width: min(100%, 38rem);
+  min-height: min(80svh, 42rem);
+  place-items: center;
+  padding: clamp(1.2rem, 4vw, 2.5rem);
+  isolation: isolate;
+  color: var(--color-text-primary, #f6fbff);
+}
+
+.boot-status-panel::before,
+.boot-status-panel::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+  z-index: -1;
+}
+
+.boot-status-panel::before {
+  inset: 10%;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(139, 234, 255, 0.14), transparent 19rem),
+    radial-gradient(circle at 78% 62%, rgba(255, 59, 107, 0.12), transparent 18rem);
+  filter: blur(0.1rem);
+}
+
+.boot-status-panel::after {
+  inset: 18%;
+  border: 1px solid rgba(139, 234, 255, 0.08);
+  transform: skewX(-8deg);
+}
+
+.boot-status-panel__grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(rgba(139, 234, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 59, 107, 0.065) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+}
+
+.boot-status-panel__frame {
+  display: grid;
+  width: min(100%, 31rem);
+  gap: 1.35rem;
+  padding: clamp(1.2rem, 3vw, 1.75rem);
+  overflow: hidden;
+}
+
+.boot-status-panel__chrome,
+.boot-status-panel__meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.boot-status-panel__chrome {
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(226, 243, 250, 0.68);
+}
+
+.boot-status-panel__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 4vw, 1.65rem);
+}
+
+.boot-status-panel__copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.42rem;
+}
+
+.boot-status-panel__eyebrow,
+.boot-status-panel__detail {
+  font-family: var(--font-mono, "Space Mono", monospace);
+  text-transform: uppercase;
+}
+
+.boot-status-panel__eyebrow {
+  color: var(--color-accent-pink, #ff637c);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+}
+
+.boot-status-panel__label {
+  font-family: var(--font-display, "Rajdhani", sans-serif);
+  font-size: clamp(1.95rem, 5vw, 3.2rem);
+  font-weight: 700;
+  line-height: 0.96;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.boot-status-panel__detail {
+  color: rgba(226, 243, 250, 0.72);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+}
+
+.boot-status-panel__meter {
+  padding-top: 0.35rem;
+}
+
+.boot-status-panel__meter span {
+  display: block;
+  height: 0.28rem;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(139, 234, 255, 0.2);
+  overflow: hidden;
+}
+
+.boot-status-panel__meter span::after {
+  display: block;
+  width: 100%;
+  height: 100%;
+  content: "";
+  background: linear-gradient(90deg, var(--color-accent-cyan, #8beaff), var(--color-accent-pink, #ff637c));
+  transform: translateX(-110%);
+  animation: boot-meter 1.2s ease-in-out infinite;
+}
+
+.boot-status-panel__meter span:nth-child(2)::after {
+  animation-delay: 0.12s;
+}
+
+.boot-status-panel__meter span:nth-child(3)::after {
+  animation-delay: 0.24s;
+}
+
+.boot-status-panel__meter span:nth-child(4)::after {
+  animation-delay: 0.36s;
+}
+
+.boot-status-panel__meter span:nth-child(5)::after {
+  animation-delay: 0.48s;
+}
+
+.route-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.route-sweep {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(90deg, rgba(2, 6, 23, 0.92), rgba(2, 6, 23, 0.54) 44%, rgba(2, 6, 23, 0.06)),
+    radial-gradient(circle at 20% 50%, rgba(255, 59, 107, 0.18), transparent 22rem),
+    radial-gradient(circle at 65% 42%, rgba(139, 234, 255, 0.14), transparent 24rem);
+  transform-origin: left center;
+}
+
+.route-sweep__band {
+  position: relative;
+  display: grid;
+  min-width: min(28rem, calc(100vw - 2rem));
+  gap: 0.32rem;
+  padding: 1rem 1.2rem;
+  border-block: 1px solid rgba(255, 59, 107, 0.36);
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 59, 107, 0.18), rgba(139, 234, 255, 0.1), transparent);
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 2rem rgba(255, 59, 107, 0.16),
+    inset 0 1px 0 rgba(224, 242, 254, 0.08);
+}
+
+.route-sweep__band::before,
+.route-sweep__band::after {
+  position: absolute;
+  top: 50%;
+  width: 18vw;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(139, 234, 255, 0.72));
+}
+
+.route-sweep__band::before {
+  right: calc(100% + 1rem);
+}
+
+.route-sweep__band::after {
+  left: calc(100% + 1rem);
+  transform: rotate(180deg);
+}
+
+.route-sweep__kicker {
+  color: rgba(226, 243, 250, 0.72);
+  font-family: var(--font-mono, "Space Mono", monospace);
+  font-size: 0.64rem;
+  letter-spacing: 0.24em;
+}
+
+.route-sweep__label {
+  color: #fff;
+  font-family: var(--font-display, "Rajdhani", sans-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.route-sweep__pulse {
+  position: absolute;
+  inset-block: 0;
+  width: 18vw;
+  opacity: 0.58;
+  mix-blend-mode: screen;
+}
+
+.route-sweep__pulse--cyan {
+  left: 18%;
+  background: linear-gradient(90deg, transparent, rgba(139, 234, 255, 0.42), transparent);
+}
+
+.route-sweep__pulse--red {
+  right: 8%;
+  background: linear-gradient(90deg, transparent, rgba(255, 59, 107, 0.46), transparent);
+}
+
+@keyframes loader-mark-bounce {
+  0% {
+    transform: translateY(0) scaleX(1.04);
+  }
+
+  100% {
+    transform: translateY(-1.75rem) scaleX(0.94);
+  }
+}
+
+@keyframes loader-mark-step {
+  0% {
+    transform: translateX(-3.6rem);
+    opacity: 0.18;
+  }
+
+  70% {
+    opacity: 0.96;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 0.72;
+  }
+}
+
+@keyframes scan-line-y {
+  0%,
+  100% {
+    transform: translateY(-42%);
+  }
+
+  50% {
+    transform: translateY(42%);
+  }
+}
+
+@keyframes scan-line-x {
+  0%,
+  100% {
+    transform: translateX(-36%);
+  }
+
+  50% {
+    transform: translateX(36%);
+  }
+}
+
+@keyframes boot-meter {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .boot-status-panel {
+    width: 100%;
+    min-height: 100svh;
+    padding: 1rem;
+  }
+
+  .boot-status-panel__frame {
+    width: min(100%, 22rem);
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .boot-status-panel__body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .boot-status-panel__chrome {
+    font-size: 0.56rem;
+    letter-spacing: 0.15em;
+  }
+
+  .boot-status-panel__label {
+    font-size: clamp(2rem, 11vw, 2.55rem);
+  }
+
+  .boot-status-panel__detail {
+    font-size: 0.64rem;
+  }
+
+  .route-sweep__band {
+    min-width: min(20rem, calc(100vw - 2rem));
+    padding: 0.85rem 1rem;
+  }
+
+  .route-sweep__label {
+    font-size: clamp(2.1rem, 13vw, 3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-mark__orb,
+  .loader-mark__step,
+  .scan-line,
+  .boot-status-panel__meter span::after {
+    animation: none;
+  }
+
+  .loader-mark__step {
+    opacity: 0.72;
+    transform: translateX(0);
+  }
+
+  .scan-line {
+    opacity: 0.14;
+    transform: none;
+  }
+}
