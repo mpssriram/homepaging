@@ -21,11 +21,12 @@ const zipPath = path.join(rootDir, "cockpit-frames.zip");
 const fallbackRawSource = path.join(rootDir, "finalphotos");
 const tempRoot = path.join(rootDir, ".tmp", "cockpit-frames");
 const rawDir = path.join(tempRoot, "raw");
-const outputDir = path.join(rootDir, "public", "cockpit-sequence");
+const outputDir = path.join(rootDir, "public", "cockpit-sequence-optimized");
 const posterPath = path.join(rootDir, "public", "cockpit-poster.webp");
 const sequenceConfigPath = path.join(rootDir, "src", "lib", "cinematicSequence.ts");
 const supportedExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
-const webpQuality = 0.86;
+const desktopFrameMaxWidth = 1920;
+const webpQuality = 0.78;
 
 async function exists(targetPath) {
   try {
@@ -348,10 +349,11 @@ function createConverterPage(frameCount) {
 
         const sourceBlob = await response.blob();
         const image = await createImageBitmap(sourceBlob);
-        canvas.width = image.width;
-        canvas.height = image.height;
+        const scale = Math.min(1, ${desktopFrameMaxWidth} / image.width);
+        canvas.width = Math.round(image.width * scale);
+        canvas.height = Math.round(image.height * scale);
         context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(image, 0, 0);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
         image.close?.();
 
         if (index >= Math.max(0, frameCount - 28)) {

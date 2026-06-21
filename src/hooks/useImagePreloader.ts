@@ -8,6 +8,8 @@ type UseImagePreloaderOptions = {
   frameStep?: number;
   startFrame?: number;
   endFrame?: number;
+  maxLoadedFrames?: number;
+  preloadDelayMs?: number;
 };
 
 export type LoadedFrame = {
@@ -23,9 +25,18 @@ export function useImagePreloader({
   frameStep = 1,
   startFrame = 1,
   endFrame = frameCount,
+  maxLoadedFrames = Number.POSITIVE_INFINITY,
+  preloadDelayMs = 64,
 }: UseImagePreloaderOptions) {
   const imagesRef = useRef(new Map<number, HTMLImageElement>());
   const requestedRef = useRef(new Set<number>());
+  const loadedOrderRef = useRef<number[]>([]);
+  const loadedVersionRef = useRef(0);
+  const nearestCacheRef = useRef<{
+    targetFrame: number;
+    version: number;
+    result: LoadedFrame | null;
+  } | null>(null);
   const [isInitialFrameReady, setIsInitialFrameReady] = useState(false);
   const safeStartFrame = useMemo(
     () => Math.min(Math.max(1, startFrame), frameCount),
@@ -36,8 +47,61 @@ export function useImagePreloader({
     [endFrame, frameCount, safeStartFrame],
   );
 
+  const safeFrameStep = useMemo(
+    () => Math.max(1, Math.floor(frameStep)),
+    [frameStep],
+  );
+
+  const snapToPreloadFrame = useCallback(
+    (frame: number) => {
+      if (frame <= safeStartFrame) {
+        return safeStartFrame;
+      }
+
+      if (frame >= safeEndFrame) {
+        return safeEndFrame;
+      }
+
+      const offset = Math.round((frame - safeStartFrame) / safeFrameStep);
+      return Math.min(
+        safeEndFrame,
+        Math.max(safeStartFrame, safeStartFrame + offset * safeFrameStep),
+      );
+    },
+    [safeEndFrame, safeFrameStep, safeStartFrame],
+  );
+
+  const rememberLoadedFrame = useCallback(
+    (index: number, image: HTMLImageElement) => {
+      imagesRef.current.set(index, image);
+      loadedOrderRef.current = [
+        ...loadedOrderRef.current.filter((frameIndex) => frameIndex !== index),
+        index,
+      ];
+
+      while (
+        loadedOrderRef.current.length > maxLoadedFrames &&
+        loadedOrderRef.current.length > 0
+      ) {
+        const evictedFrame = loadedOrderRef.current.shift();
+
+        if (evictedFrame !== undefined && evictedFrame !== safeStartFrame) {
+          imagesRef.current.delete(evictedFrame);
+          requestedRef.current.delete(evictedFrame);
+        }
+      }
+
+      loadedVersionRef.current += 1;
+      nearestCacheRef.current = null;
+
+      if (index === safeStartFrame) {
+        setIsInitialFrameReady(true);
+      }
+    },
+    [maxLoadedFrames, safeStartFrame],
+  );
+
   const orderedFrames = useMemo(() => {
-    const safeFrameStep = Math.max(1, Math.floor(frameStep));
     const frames = [safeStartFrame];
 
     if (safeEndFrame > safeStartFrame) {
@@ -55,7 +119,7 @@ export function useImagePreloader({
     }
 
     return frames;
-  }, [frameStep, safeEndFrame, safeStartFrame]);
+  }, [safeEndFrame, safeFrameStep, safeStartFrame]);
 
   const loadFrame = useCallback(
     (index: number) => {
@@ -65,13 +129,21 @@ export function useImagePreloader({
 
       requestedRef.current.add(index);
       const image = new Image();
+      image.decoding = "async";
+      image.fetchPriority = index === safeStartFrame ? "high" : "low";
 
       image.onload = () => {
-        imagesRef.current.set(index, image);
+        const decodedImage = image.decode?.();
 
-        if (index === safeStartFrame) {
-          setIsInitialFrameReady(true);
+        if (decodedImage) {
+          decodedImage.then(
+            () => rememberLoadedFrame(index, image),
+            () => rememberLoadedFrame(index, image),
+          );
+          return;
         }
+
+        rememberLoadedFrame(index, image);
       };
 
       image.onerror = () => {
@@ -81,7 +153,37 @@ export function useImagePreloader({
 
       image.src = getFrameSrc(index);
     },
-    [enabled, getFrameSrc, safeStartFrame],
+    [enabled, getFrameSrc, rememberLoadedFrame, safeStartFrame],
+  );
+
+  const preloadFrameWindow = useCallback(
+    (centerFrame: number, radius: number) => {
+      if (!enabled) {
+        return;
+      }
+
+      const center = snapToPreloadFrame(centerFrame);
+      const candidates = new Set<number>([safeStartFrame, safeEndFrame, center]);
+
+      for (
+        let distance = safeFrameStep;
+        distance <= radius;
+        distance += safeFrameStep
+      ) {
+        candidates.add(snapToPreloadFrame(center - distance));
+        candidates.add(snapToPreloadFrame(center + distance));
+      }
+
+      candidates.forEach((frameIndex) => loadFrame(frameIndex));
+    },
+    [
+      enabled,
+      loadFrame,
+      safeEndFrame,
+      safeFrameStep,
+      safeStartFrame,
+      snapToPreloadFrame,
+    ],
   );
 
   useEffect(() => {
@@ -105,7 +207,7 @@ export function useImagePreloader({
       cursor += batchSize;
 
       if (cursor < orderedFrames.length) {
-        timeoutId = window.setTimeout(loadNextBatch, 48);
+        timeoutId = window.setTimeout(loadNextBatch, preloadDelayMs);
       }
     };
 
@@ -118,7 +220,7 @@ export function useImagePreloader({
         window.clearTimeout(timeoutId);
       }
     };
-  }, [batchSize, enabled, loadFrame, orderedFrames]);
+  }, [batchSize, enabled, loadFrame, orderedFrames, preloadDelayMs]);
 
   useEffect(() => {
     setIsInitialFrameReady(imagesRef.current.has(safeStartFrame));
@@ -126,10 +228,26 @@ export function useImagePreloader({
 
   const getNearestLoadedFrame = useCallback(
     (targetFrame: number): LoadedFrame | null => {
+      const cached = nearestCacheRef.current;
+
+      if (
+        cached &&
+        cached.targetFrame === targetFrame &&
+        cached.version === loadedVersionRef.current
+      ) {
+        return cached.result;
+      }
+
       const exactImage = imagesRef.current.get(targetFrame);
 
       if (exactImage) {
-        return { index: targetFrame, image: exactImage };
+        const result = { index: targetFrame, image: exactImage };
+        nearestCacheRef.current = {
+          targetFrame,
+          version: loadedVersionRef.current,
+          result,
+        };
+        return result;
       }
 
       for (let distance = 1; distance <= frameCount; distance += 1) {
@@ -139,14 +257,31 @@ export function useImagePreloader({
         const nextImage = imagesRef.current.get(next);
 
         if (previousImage) {
-          return { index: previous, image: previousImage };
+          const result = { index: previous, image: previousImage };
+          nearestCacheRef.current = {
+            targetFrame,
+            version: loadedVersionRef.current,
+            result,
+          };
+          return result;
         }
 
         if (nextImage) {
-          return { index: next, image: nextImage };
+          const result = { index: next, image: nextImage };
+          nearestCacheRef.current = {
+            targetFrame,
+            version: loadedVersionRef.current,
+            result,
+          };
+          return result;
         }
       }
 
+      nearestCacheRef.current = {
+        targetFrame,
+        version: loadedVersionRef.current,
+        result: null,
+      };
       return null;
     },
     [frameCount],
@@ -155,5 +290,6 @@ export function useImagePreloader({
   return {
     isInitialFrameReady,
     getNearestLoadedFrame,
+    preloadFrameWindow,
   };
 }

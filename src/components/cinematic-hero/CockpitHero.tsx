@@ -75,7 +75,7 @@ export function CockpitHero() {
     : COCKPIT_FRAME_COUNT;
   const sequenceStartFrame = 1;
   const sequenceEndFrame = frameCount;
-  const frameStep = 2;
+  const frameStep = isMobile ? 2 : 4;
   const getFrameSrc = isMobile
     ? getCockpitMobilePortraitFrameSrc
     : getCockpitFrameSrc;
@@ -94,12 +94,15 @@ export function CockpitHero() {
     [0.82, 0.9, 1],
     [0, 1, 1],
   );
-  const { isInitialFrameReady, getNearestLoadedFrame } = useImagePreloader({
+  const { isInitialFrameReady, getNearestLoadedFrame, preloadFrameWindow } =
+    useImagePreloader({
     frameCount,
     getFrameSrc,
     enabled: !shouldUseStaticFallback,
-    batchSize: isMobile ? 2 : 4,
+    batchSize: isMobile ? 2 : 3,
     frameStep,
+    maxLoadedFrames: isMobile ? 72 : 72,
+    preloadDelayMs: isMobile ? 80 : 96,
     startFrame: sequenceStartFrame,
     endFrame: sequenceEndFrame,
   });
@@ -113,11 +116,13 @@ export function CockpitHero() {
     const availableFrames = sequenceEndFrame - sequenceStartFrame;
     const rawFrame =
       Math.round(sequenceProgress * availableFrames) + sequenceStartFrame;
-    frameIndexRef.current = clamp(
+    const nextFrame = clamp(
       rawFrame,
       sequenceStartFrame,
       sequenceEndFrame,
     );
+    frameIndexRef.current = nextFrame;
+    preloadFrameWindow(nextFrame, isMobile ? 8 : 16);
 
     if (!hasEntered && progress > 0.02) {
       setHasEntered(true);
@@ -187,6 +192,8 @@ export function CockpitHero() {
           frameCount={frameCount}
           getNearestLoadedFrame={getNearestLoadedFrame}
           maxDevicePixelRatio={isMobile ? 1 : 1.5}
+          minDevicePixelRatio={isMobile ? 1 : 0.65}
+          maxCanvasPixels={isMobile ? 1_000_000 : 2_000_000}
           fitMode={fitMode}
         />
         <motion.div

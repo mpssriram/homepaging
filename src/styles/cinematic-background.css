@@ -254,9 +254,13 @@
   box-shadow: 0 0 0.85rem rgba(34, 211, 238, 0.8);
 }
 
-.hero-canvas,
 .static-hero img {
   filter: brightness(1.2) contrast(1.08) saturate(1.24);
+}
+
+.hero-canvas {
+  contain: strict;
+  transform: translateZ(0);
 }
 
 .hero-overlay::before {

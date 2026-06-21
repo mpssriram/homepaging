@@ -29,6 +29,7 @@ const accentByVariant: Record<SiteBackgroundVariant, string> = {
 
 const HOME_RAYS_SCROLL_START = 0.4;
 const HOME_RAYS_SCROLL_END = 1;
+const HOME_RAYS_MOUNT_START = 1.1;
 const MAX_RAYS_OPACITY = 0.35;
 
 export function SiteBackground({
@@ -40,6 +41,10 @@ export function SiteBackground({
   const crewRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const accent = accentByVariant[variant];
+  const isHome = variant === "home";
+  const [shouldRenderRays, setShouldRenderRays] = useState(
+    () => isHome && !afterCockpit,
+  );
   const [hudTime, setHudTime] = useState(() => getHudTime());
 
   const lightRaysProps = useMemo(
@@ -122,7 +127,17 @@ export function SiteBackground({
   useEffect(() => {
     const root = rootRef.current;
 
-    if (!root || !afterCockpit) {
+    if (!isHome) {
+      setShouldRenderRays(false);
+      return;
+    }
+
+    if (!afterCockpit) {
+      setShouldRenderRays(true);
+      return;
+    }
+
+    if (!root) {
       return;
     }
 
@@ -135,6 +150,10 @@ export function SiteBackground({
       const opacity = Math.max(0, Math.min(progress, 1)) * MAX_RAYS_OPACITY;
 
       root.style.setProperty("--site-rays-opacity", opacity.toFixed(3));
+      setShouldRenderRays((isRendering) => {
+        const shouldRender = scrollDepth >= HOME_RAYS_MOUNT_START;
+        return isRendering === shouldRender ? isRendering : shouldRender;
+      });
     };
 
     updateOpacity();
@@ -145,7 +164,7 @@ export function SiteBackground({
       window.removeEventListener("scroll", updateOpacity);
       window.removeEventListener("resize", updateOpacity);
     };
-  }, [afterCockpit]);
+  }, [afterCockpit, isHome]);
 
   return (
     <div
@@ -157,10 +176,12 @@ export function SiteBackground({
     >
       <div className="site-background__base" />
       <div className="site-background__rays" data-home-layer="">
-        <LightRays
-          className="site-background__rays-canvas"
-          {...lightRaysProps}
-        />
+        {shouldRenderRays ? (
+          <LightRays
+            className="site-background__rays-canvas"
+            {...lightRaysProps}
+          />
+        ) : null}
       </div>
       <div className="site-background__grid" data-shared-layer="" />
       <div className="site-background__variant site-background__variant--community">

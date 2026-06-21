@@ -1,3 +1,5 @@
+// Desktop sequence is served from /cockpit-sequence-optimized as 1920x1080
+// WebP frames. Keep this path in sync with scripts/prepare-cockpit-sequence.mjs.
 export const COCKPIT_FRAME_COUNT = 240;
 
 // Portrait mobile sequence (720x1280 / 1080x1920, true vertical) served from
@@ -15,7 +17,7 @@ const frameName = (index: number, ext: "webp" | "jpg") =>
   `frame_${String(index).padStart(4, "0")}.${ext}`;
 
 export const getCockpitFrameSrc = (index: number) =>
-  `/cockpit-sequence/${frameName(index, "webp")}`;
+  `/cockpit-sequence-optimized/${frameName(index, "webp")}`;
 
 export const getCockpitMobilePortraitFrameSrc = (index: number) =>
   `/cockpit-mobile-portrait/${frameName(index, "jpg")}`;
@@ -27,7 +29,7 @@ export const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), max);
 
 // Base paths for the sequences, surfaced for the debug overlay.
-export const COCKPIT_DESKTOP_SEQUENCE_PATH = "/cockpit-sequence";
+export const COCKPIT_DESKTOP_SEQUENCE_PATH = "/cockpit-sequence-optimized";
 export const COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH = "/cockpit-mobile-portrait";
 export const COCKPIT_MOBILE_SEQUENCE_PATH = "/cockpit-mobile";
 
@@ -35,8 +37,8 @@ export type CockpitOverride = "mobile" | "desktop" | null;
 
 // Runtime override read from the URL, so the mobile/desktop branch can be forced
 // on a real device against the deployed build:
-//   ?cockpitMobile=1  -> force the mobile sequence + contain fit
-//   ?cockpitDesktop=1 -> force the desktop sequence + cover fit
+//   ?cockpitMobile=1  -> force the mobile sequence
+//   ?cockpitDesktop=1 -> force the desktop sequence
 export function readCockpitOverride(search?: string): CockpitOverride {
   if (typeof window === "undefined" && search === undefined) {
     return null;

@@ -10,6 +10,8 @@ type CockpitCanvasSequenceProps = {
   frameCount: number;
   getNearestLoadedFrame: (targetFrame: number) => LoadedFrame | null;
   maxDevicePixelRatio?: number;
+  minDevicePixelRatio?: number;
+  maxCanvasPixels?: number;
   fitMode?: FitMode;
 };
 
@@ -41,9 +43,12 @@ export function CockpitCanvasSequence({
   frameCount,
   getNearestLoadedFrame,
   maxDevicePixelRatio = 1.5,
+  minDevicePixelRatio = 0.75,
+  maxCanvasPixels = 2_000_000,
   fitMode = "cover",
 }: CockpitCanvasSequenceProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const lastImageRef = useRef<HTMLImageElement | null>(null);
 
   const resizeCanvas = useCallback(() => {
@@ -56,7 +61,12 @@ export function CockpitCanvasSequence({
     const bounds = canvas.parentElement?.getBoundingClientRect();
     const cssWidth = Math.max(1, Math.round(bounds?.width ?? window.innerWidth));
     const cssHeight = Math.max(1, Math.round(bounds?.height ?? window.innerHeight));
-    const dpr = Math.min(window.devicePixelRatio || 1, maxDevicePixelRatio);
+    const cssPixels = cssWidth * cssHeight;
+    const pixelBudgetRatio = Math.sqrt(maxCanvasPixels / cssPixels);
+    const dpr = Math.max(
+      minDevicePixelRatio,
+      Math.min(window.devicePixelRatio || 1, maxDevicePixelRatio, pixelBudgetRatio),
+    );
     const nextWidth = Math.round(cssWidth * dpr);
     const nextHeight = Math.round(cssHeight * dpr);
 
@@ -70,7 +80,7 @@ export function CockpitCanvasSequence({
     canvas.style.height = `${cssHeight}px`;
     // Force a redraw on the next animation frame.
     lastImageRef.current = null;
-  }, [maxDevicePixelRatio]);
+  }, [maxCanvasPixels, maxDevicePixelRatio, minDevicePixelRatio]);
 
   useEffect(() => {
     resizeCanvas();
@@ -90,6 +100,16 @@ export function CockpitCanvasSequence({
       return;
     }
 
+    const context =
+      contextRef.current ??
+      canvas.getContext("2d", { alpha: false, desynchronized: true });
+
+    if (!context) {
+      return;
+    }
+
+    contextRef.current = context;
+
     const rafIdRef: { current: number | null } = { current: null };
     const runningRef = { current: false };
     const inViewRef = { current: false };
@@ -99,12 +119,6 @@ export function CockpitCanvasSequence({
       const loadedFrame = getNearestLoadedFrame(safeFrame);
 
       if (!loadedFrame || loadedFrame.image === lastImageRef.current) {
-        return;
-      }
-
-      const context = canvas.getContext("2d");
-
-      if (!context) {
         return;
       }
 
@@ -119,6 +133,9 @@ export function CockpitCanvasSequence({
       context.setTransform(1, 0, 0, 1, 0, 0);
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "medium";
+      context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
+      context.filter = "none";
 
       if (fitMode === "contain") {
         // The wide 16:9 frame can't fill a portrait stage without cropping the
@@ -141,8 +158,6 @@ export function CockpitCanvasSequence({
         // A subtle scrim deepens the bands and hides the blur's bright edges.
         context.fillStyle = "rgba(3, 6, 12, 0.35)";
         context.fillRect(0, 0, width, height);
-      } else {
-        context.clearRect(0, 0, width, height);
       }
 
       context.drawImage(
