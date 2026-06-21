@@ -1,12 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  lazy,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { CockpitHero } from "../components/cinematic-hero/CockpitHero";
 import { Magnet } from "../components/ui/Magnet";
 import { Reveal } from "../components/ui/Reveal";
@@ -21,41 +14,16 @@ const HomeDroneHero = lazy(
 );
 
 function DeferredHomeDroneHero() {
-  const mountRef = useRef<HTMLDivElement | null>(null);
-  const [shouldLoad, setShouldLoad] = useState(false);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-
-    if (!mount || shouldLoad) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoad(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "600px 0px" },
-    );
-
-    observer.observe(mount);
-
-    return () => observer.disconnect();
-  }, [shouldLoad]);
-
+  // Code-split (lazy) so the heavy R3F/Three.js chunk doesn't bloat the
+  // initial bundle, but fetch it right away instead of waiting for scroll
+  // proximity — the cockpit's 235vh scroll-through gives it plenty of time to
+  // arrive before it's actually needed, so this section never shows a blank
+  // gap when the cockpit's sticky pin releases. The Canvas inside HomeDroneHero
+  // still defers WebGL/Three.js scene creation until it's truly in view.
   return (
-    <div ref={mountRef}>
-      {shouldLoad ? (
-        <Suspense fallback={<div aria-hidden="true" className="min-h-screen" />}>
-          <HomeDroneHero />
-        </Suspense>
-      ) : (
-        <div aria-hidden="true" className="min-h-screen" />
-      )}
-    </div>
+    <Suspense fallback={<div aria-hidden="true" className="min-h-screen" />}>
+      <HomeDroneHero />
+    </Suspense>
   );
 }
 
