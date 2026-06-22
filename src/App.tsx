@@ -32,6 +32,24 @@ function readRoute(): RouteState {
   };
 }
 
+function readSameOriginReferrerPathname() {
+  if (!document.referrer) {
+    return null;
+  }
+
+  try {
+    const referrerUrl = new URL(document.referrer);
+
+    if (referrerUrl.origin !== window.location.origin) {
+      return null;
+    }
+
+    return referrerUrl.pathname.replace(/\/+$/, "") || "/";
+  } catch {
+    return null;
+  }
+}
+
 export function App() {
   const reducedMotion = useReducedMotion();
   const [route, setRoute] = useState(readRoute);
@@ -166,11 +184,13 @@ export function App() {
     syncScrollbarCompensation();
     window.addEventListener("popstate", syncRoute);
     window.addEventListener("resize", syncScrollbarCompensation);
+    window.addEventListener("click", handleNavigationClick, true);
     document.addEventListener("click", handleNavigationClick, true);
 
     return () => {
       window.removeEventListener("popstate", syncRoute);
       window.removeEventListener("resize", syncScrollbarCompensation);
+      window.removeEventListener("click", handleNavigationClick, true);
       document.removeEventListener("click", handleNavigationClick, true);
     };
   }, [handleNavigationClick, syncRoute]);
@@ -182,6 +202,18 @@ export function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const referrerPathname = readSameOriginReferrerPathname();
+    const currentPathname = readRoute().pathname;
+
+    if (!referrerPathname || referrerPathname === currentPathname) {
+      return;
+    }
+
+    previousPathnameRef.current = referrerPathname;
+    beginRouteTransition(currentPathname);
+  }, [beginRouteTransition]);
 
   useEffect(() => {
     document.title =
