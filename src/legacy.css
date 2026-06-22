@@ -80,17 +80,6 @@ p {
   background: #000;
 }
 
-.canvas-loader {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
-  pointer-events: none;
-  background: #000;
-}
-
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -451,8 +440,7 @@ main [id] {
 .cockpit-hero,
 .sticky-viewport,
 .static-hero,
-.hero-canvas,
-.canvas-loader {
+.hero-canvas {
   background: #01050f;
 }
 

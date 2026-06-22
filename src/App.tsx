@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SiteBackground, type SiteBackgroundVariant } from "./components/backgrounds/SiteBackground";
-import { RouteTransitionOverlay } from "./components/ui/LoadingSystem";
+import { ClubRouteTransition, type RouteTransitionCue } from "./components/ui/ClubRouteTransition";
 import { ScrollProgress } from "./components/ui/ScrollProgress";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { CommunityPage } from "./pages/CommunityPage";
@@ -25,11 +25,6 @@ type RouteState = {
   hash: string;
 };
 
-type RouteTransitionState = {
-  id: number;
-  pathname: string;
-};
-
 function readRoute(): RouteState {
   return {
     pathname: window.location.pathname.replace(/\/+$/, "") || "/",
@@ -41,36 +36,48 @@ export function App() {
   const reducedMotion = useReducedMotion();
   const [route, setRoute] = useState(readRoute);
   const [routeTransition, setRouteTransition] =
-    useState<RouteTransitionState | null>(null);
-  const currentPathnameRef = useRef(route.pathname);
+    useState<RouteTransitionCue | null>(null);
+  const previousPathnameRef = useRef(route.pathname);
   const routeTransitionIdRef = useRef(0);
+  const routeTransitionTimeoutRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const syncRoute = () => {
-      const nextRoute = readRoute();
-
-      if (currentPathnameRef.current !== nextRoute.pathname) {
-        currentPathnameRef.current = nextRoute.pathname;
-        routeTransitionIdRef.current += 1;
-        setRouteTransition({
-          id: routeTransitionIdRef.current,
-          pathname: nextRoute.pathname,
-        });
+  const beginRouteTransition = useCallback(
+    (pathname: string) => {
+      if (previousPathnameRef.current === pathname) {
+        return;
       }
 
-      setRoute(nextRoute);
-    };
+      previousPathnameRef.current = pathname;
+      routeTransitionIdRef.current += 1;
+      setRouteTransition({
+        id: routeTransitionIdRef.current,
+        pathname,
+      });
 
-    const syncScrollbarCompensation = () => {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty(
-        "--scrollbar-compensation",
-        `${Math.max(scrollbarWidth, 0)}px`,
+      if (routeTransitionTimeoutRef.current !== null) {
+        window.clearTimeout(routeTransitionTimeoutRef.current);
+      }
+
+      routeTransitionTimeoutRef.current = window.setTimeout(
+        () => {
+          setRouteTransition(null);
+          routeTransitionTimeoutRef.current = null;
+        },
+        reducedMotion ? 260 : 760,
       );
-    };
+    },
+    [reducedMotion],
+  );
 
-    const handleNavigationClick = (event: MouseEvent) => {
+  const syncRoute = useCallback(() => {
+    const nextRoute = readRoute();
+
+    beginRouteTransition(nextRoute.pathname);
+    setRoute(nextRoute);
+  }, [beginRouteTransition]);
+
+  const handleNavigationClick = useCallback(
+    (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
         event.button !== 0 ||
@@ -82,9 +89,14 @@ export function App() {
         return;
       }
 
-      const target = event.target;
+      const target =
+        event.target instanceof Element
+          ? event.target
+          : event.target instanceof Node
+            ? event.target.parentElement
+            : null;
 
-      if (!(target instanceof Element)) {
+      if (!target) {
         return;
       }
 
@@ -122,13 +134,31 @@ export function App() {
         nextUrl.pathname.replace(/\/+$/, "") || "/";
       const nextHash = nextUrl.hash;
       const nextRoute = `${nextPathname}${nextHash}`;
-      const currentRoute = `${window.location.pathname.replace(/\/+$/, "") || "/"}${window.location.hash}`;
+      const currentPathname =
+        window.location.pathname.replace(/\/+$/, "") || "/";
+      const currentRoute = `${currentPathname}${window.location.hash}`;
 
       if (nextRoute !== currentRoute) {
+        if (nextPathname !== currentPathname) {
+          beginRouteTransition(nextPathname);
+        }
+
         window.history.pushState({}, "", nextRoute);
       }
 
       syncRoute();
+    },
+    [beginRouteTransition, syncRoute],
+  );
+
+  useEffect(() => {
+    const syncScrollbarCompensation = () => {
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty(
+        "--scrollbar-compensation",
+        `${Math.max(scrollbarWidth, 0)}px`,
+      );
     };
 
     window.history.scrollRestoration = "manual";
@@ -136,12 +166,20 @@ export function App() {
     syncScrollbarCompensation();
     window.addEventListener("popstate", syncRoute);
     window.addEventListener("resize", syncScrollbarCompensation);
-    document.addEventListener("click", handleNavigationClick);
+    document.addEventListener("click", handleNavigationClick, true);
 
     return () => {
       window.removeEventListener("popstate", syncRoute);
       window.removeEventListener("resize", syncScrollbarCompensation);
-      document.removeEventListener("click", handleNavigationClick);
+      document.removeEventListener("click", handleNavigationClick, true);
+    };
+  }, [handleNavigationClick, syncRoute]);
+
+  useEffect(() => {
+    return () => {
+      if (routeTransitionTimeoutRef.current !== null) {
+        window.clearTimeout(routeTransitionTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -170,20 +208,40 @@ export function App() {
   }, [route.hash, route.pathname]);
 
   return (
-    <>
+    <div>
       <SiteBackground
         afterCockpit={route.pathname === "/"}
         variant={getBackgroundVariant(route.pathname)}
       />
       <ScrollProgress />
-      <RouteTransitionOverlay transition={routeTransition} />
+      <ClubRouteTransition cue={routeTransition} />
       <AnimatePresence initial={false} mode="wait">
         <motion.div
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: "brightness(1) saturate(1)",
+          }}
           className="relative z-[1]"
-          exit={{ opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 18, filter: reducedMotion ? "blur(0px)" : "blur(6px)" }}
-          initial={{ opacity: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 18, filter: reducedMotion ? "blur(0px)" : "blur(6px)" }}
+          exit={{
+            opacity: reducedMotion ? 1 : 0,
+            y: reducedMotion ? 0 : -14,
+            scale: reducedMotion ? 1 : 1.012,
+            filter: reducedMotion
+              ? "brightness(1) saturate(1)"
+              : "brightness(0.74) saturate(0.82)",
+          }}
+          initial={{
+            opacity: reducedMotion ? 1 : 0,
+            y: reducedMotion ? 0 : 18,
+            scale: reducedMotion ? 1 : 0.985,
+            filter: reducedMotion
+              ? "brightness(1) saturate(1)"
+              : "brightness(0.82) saturate(0.88)",
+          }}
           key={route.pathname}
+          style={{ transformOrigin: "50% 38%" }}
           transition={{
             duration: reducedMotion ? 0 : 0.34,
             ease: [0.16, 1, 0.3, 1],
@@ -192,7 +250,7 @@ export function App() {
           {renderPage(route.pathname)}
         </motion.div>
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 
