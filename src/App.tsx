@@ -57,7 +57,10 @@ export function App() {
     useState<RouteTransitionCue | null>(null);
   const previousPathnameRef = useRef(route.pathname);
   const routeTransitionIdRef = useRef(0);
-  const routeTransitionTimeoutRef = useRef<number | null>(null);
+
+  const completeRouteTransition = useCallback((id: number) => {
+    setRouteTransition((current) => (current?.id === id ? null : current));
+  }, []);
 
   const beginRouteTransition = useCallback(
     (pathname: string) => {
@@ -66,25 +69,14 @@ export function App() {
       }
 
       previousPathnameRef.current = pathname;
-      routeTransitionIdRef.current += 1;
+      const transitionId = routeTransitionIdRef.current + 1;
+      routeTransitionIdRef.current = transitionId;
       setRouteTransition({
-        id: routeTransitionIdRef.current,
+        id: transitionId,
         pathname,
       });
-
-      if (routeTransitionTimeoutRef.current !== null) {
-        window.clearTimeout(routeTransitionTimeoutRef.current);
-      }
-
-      routeTransitionTimeoutRef.current = window.setTimeout(
-        () => {
-          setRouteTransition(null);
-          routeTransitionTimeoutRef.current = null;
-        },
-        reducedMotion ? 260 : 760,
-      );
     },
-    [reducedMotion],
+    [],
   );
 
   const syncRoute = useCallback(() => {
@@ -196,12 +188,19 @@ export function App() {
   }, [handleNavigationClick, syncRoute]);
 
   useEffect(() => {
-    return () => {
-      if (routeTransitionTimeoutRef.current !== null) {
-        window.clearTimeout(routeTransitionTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (!routeTransition) {
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => {
+        completeRouteTransition(routeTransition.id);
+      },
+      reducedMotion ? 320 : 940,
+    );
+
+    return () => window.clearTimeout(timeout);
+  }, [completeRouteTransition, reducedMotion, routeTransition]);
 
   useEffect(() => {
     const referrerPathname = readSameOriginReferrerPathname();

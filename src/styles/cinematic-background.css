@@ -322,52 +322,6 @@
   background: transparent;
 }
 
-/* Dev-only (or ?cockpitDebug=1) diagnostics overlay for the cockpit hero. */
-.cockpit-debug {
-  position: fixed;
-  top: max(0.5rem, env(safe-area-inset-top));
-  left: 0.5rem;
-  z-index: 9999;
-  max-width: min(92vw, 22rem);
-  padding: 0.5rem 0.65rem;
-  border: 1px solid rgba(139, 234, 255, 0.45);
-  border-radius: 0.45rem;
-  background: rgba(2, 8, 16, 0.82);
-  color: #cdf3ff;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.62rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  pointer-events: none;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-
-.cockpit-debug__title {
-  display: block;
-  margin-bottom: 0.3rem;
-  color: #8beaff;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-}
-
-.cockpit-debug__row {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: space-between;
-}
-
-.cockpit-debug__key {
-  color: rgba(205, 243, 255, 0.6);
-}
-
-.cockpit-debug__value {
-  color: #eafaff;
-  font-weight: 700;
-  text-align: right;
-  word-break: break-all;
-}
-
 .static-hero img {
   -webkit-mask-image: linear-gradient(to bottom, #000 66%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 66%, transparent 100%);

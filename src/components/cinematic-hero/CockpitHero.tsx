@@ -10,19 +10,14 @@ import { useMobileViewport } from "../../hooks/useMobileViewport";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import {
   clamp,
-  COCKPIT_DESKTOP_SEQUENCE_PATH,
   COCKPIT_FRAME_COUNT,
   COCKPIT_MOBILE_PORTRAIT_FRAME_COUNT,
-  COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH,
-  COCKPIT_MOBILE_SEQUENCE_PATH,
   getCockpitFrameSrc,
   getCockpitMobileFrameSrc,
   getCockpitMobilePortraitFrameSrc,
-  readCockpitDebugEnabled,
   readCockpitOverride,
 } from "../../lib/cinematicSequence";
 import { CockpitCanvasSequence } from "./CockpitCanvasSequence";
-import { CockpitDebugOverlay } from "./CockpitDebugOverlay";
 import { HeroOverlay } from "./HeroOverlay";
 
 // The cockpit swaps to the dedicated mobile sequence below 768px (per the
@@ -39,7 +34,6 @@ export function CockpitHero() {
   // mobile vs desktop path can be confirmed on a real device; otherwise the
   // viewport breakpoint decides. Read once — the query string is stable per load.
   const override = useMemo(() => readCockpitOverride(), []);
-  const debugEnabled = useMemo(() => readCockpitDebugEnabled(), []);
   const isMobile =
     override === "mobile"
       ? true
@@ -49,9 +43,6 @@ export function CockpitHero() {
   // The portrait frames are already vertical, so the phone fills with "cover"
   // (no blurred bands, no landscape-clip look). Desktop stays "cover" too.
   const fitMode = "cover";
-  const sequencePath = isMobile
-    ? COCKPIT_MOBILE_PORTRAIT_SEQUENCE_PATH
-    : COCKPIT_DESKTOP_SEQUENCE_PATH;
   const shouldUseStaticFallback = reducedMotion;
   // Mobile and desktop are independent sequences with their own frame counts;
   // both play full-length, mapped across the same scroll progress.
@@ -126,16 +117,6 @@ export function CockpitHero() {
           alt="Futuristic cockpit overlooking a cyber city"
         />
         <HeroOverlay acquireOpacity={1} hideScrollCue minimal={isMobile} />
-        {debugEnabled && (
-          <CockpitDebugOverlay
-            frameIndexRef={frameIndexRef}
-            getFrameSrc={getCockpitMobileFrameSrc}
-            isMobile={isMobile}
-            fitMode="contain"
-            sequencePath={COCKPIT_MOBILE_SEQUENCE_PATH}
-            override={override}
-          />
-        )}
       </section>
     );
   }
@@ -158,17 +139,6 @@ export function CockpitHero() {
           hideScrollCue={isMobile || hasEntered}
           minimal={isMobile}
         />
-        {debugEnabled && (
-          <CockpitDebugOverlay
-            frameIndexRef={frameIndexRef}
-            getFrameSrc={getFrameSrc}
-            isMobile={isMobile}
-            fitMode={fitMode}
-            sequencePath={sequencePath}
-            override={override}
-            getNearestLoadedFrame={getNearestLoadedFrame}
-          />
-        )}
       </motion.div>
     </section>
   );
